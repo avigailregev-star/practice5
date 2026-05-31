@@ -12,6 +12,13 @@
   --font-mono: var(--font-geist-mono);
 }
 
+@theme {
+  --color-brand-red: #C0392B;
+  --color-brand-gold: #F1C40F;
+  --color-brand-dark: #1A1A2E;
+  --font-sans: var(--font-heebo), sans-serif;
+}
+
 @media (prefers-color-scheme: dark) {
   :root {
     --background: #0a0a0a;
