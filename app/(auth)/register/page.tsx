@@ -1,10 +1,20 @@
 import Link from "next/link";
 import { signup } from "@/app/actions/auth";
 
-export default function RegisterPage() {
+export default async function RegisterPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ error?: string }>;
+}) {
+  const { error } = await searchParams;
   return (
     <div className="bg-white rounded-2xl p-6 shadow-xl">
       <h2 className="text-xl font-bold text-center mb-6">הרשמה</h2>
+      {error && (
+        <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg px-3 py-2 mb-4">
+          {error}
+        </div>
+      )}
       <form className="space-y-4">
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
