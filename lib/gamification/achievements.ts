@@ -32,28 +32,30 @@ export async function checkAndGrantAchievements(
   const supabase = await createClient();
   const granted: AchievementType[] = [];
 
-  const { data: existing } = await supabase
+  const existingResult = await supabase
     .from("achievements")
     .select("achievement_type")
-    .eq("student_id", studentId);
+    .eq("student_id", studentId) as unknown as { data: { achievement_type: string }[] | null };
 
-  const existingTypes = new Set(existing?.map((a) => a.achievement_type) ?? []);
+  const existingTypes = new Set(existingResult.data?.map((a) => a.achievement_type) ?? []);
 
-  const { count: sessionCount } = await supabase
+  const sessionCountResult = await supabase
     .from("practice_sessions")
     .select("*", { count: "exact", head: true })
     .eq("student_id", studentId)
-    .not("completed_at", "is", null);
+    .not("completed_at", "is", null) as unknown as { count: number | null };
+
+  const sessionCount = sessionCountResult.count;
 
   const skillCounts: Record<string, number> = {};
   for (const skill of ["notes", "rhythm", "scales"]) {
-    const { count } = await supabase
+    const skillResult = await supabase
       .from("practice_sessions")
       .select("*", { count: "exact", head: true })
       .eq("student_id", studentId)
       .eq("skill_type", skill)
-      .not("completed_at", "is", null);
-    skillCounts[skill] = count ?? 0;
+      .not("completed_at", "is", null) as unknown as { count: number | null };
+    skillCounts[skill] = skillResult.count ?? 0;
   }
 
   const toGrant: AchievementType[] = [];
@@ -77,7 +79,7 @@ export async function checkAndGrantAchievements(
 
   if (toGrant.length > 0) {
     await supabase.from("achievements").insert(
-      toGrant.map((type) => ({ student_id: studentId, achievement_type: type }))
+      toGrant.map((type) => ({ student_id: studentId, achievement_type: type })) as never
     );
     granted.push(...toGrant);
   }
