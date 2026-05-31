@@ -45,11 +45,26 @@ export async function generateExercise(
 
 חשוב: התרגול חייב להתאים בדיוק ל-${durationMinutes} דקות. רמה ${difficultyLevel} = ${difficultyLevel <= 2 ? "פשוט מאוד, תנועות בסיסיות" : difficultyLevel <= 4 ? "דורש ריכוז, מספר צעדים" : "מאתגר, דורש מיומנות"}.`;
 
-  const message = await client.messages.create({
-    model: "claude-3-5-haiku-20241022",
-    max_tokens: 512,
-    messages: [{ role: "user", content: prompt }],
-  });
+  let message;
+  try {
+    message = await client.messages.create({
+      model: "claude-3-5-haiku-20241022",
+      max_tokens: 512,
+      messages: [{ role: "user", content: prompt }],
+    });
+  } catch (err: unknown) {
+    console.error("Anthropic API error:", JSON.stringify(err, null, 2));
+    console.error("API key length:", process.env.ANTHROPIC_API_KEY?.length);
+    console.error("API key starts with:", process.env.ANTHROPIC_API_KEY?.substring(0, 15));
+    return {
+      title: `תרגול ${SKILL_CONTEXT[skillType].split(" — ")[0]}`,
+      description: `תרגול ${durationMinutes} דקות ברמה ${difficultyLevel}`,
+      steps: ["נגן בקצב איטי ומדויק", "חזור 3 פעמים על כל שלב", "האיץ בהדרגה כשמרגיש בנוח"],
+      tip: "התרכז בדיוק, לא במהירות",
+      skill_type: skillType,
+      difficulty: difficultyLevel,
+    };
+  }
 
   const text = message.content[0].type === "text" ? message.content[0].text : "";
 

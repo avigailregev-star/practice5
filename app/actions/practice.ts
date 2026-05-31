@@ -27,13 +27,7 @@ export async function startPracticeSession(formData: FormData) {
     const profile = profileResult.data;
     const difficultyLevel = profile?.level ?? 1;
 
-    let exercise;
-    try {
-      exercise = await generateExercise(skillType, durationMinutes, difficultyLevel);
-    } catch (err) {
-      console.error("Exercise generation failed:", err);
-      redirect("/practice?error=ai_failed");
-    }
+    const exercise = await generateExercise(skillType, durationMinutes, difficultyLevel);
 
     const sessionResult = await supabase
       .from("practice_sessions")
