@@ -13,8 +13,41 @@ export interface Exercise {
 
 const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
+const FALLBACKS: Record<SkillType, Omit<Exercise, 'skill_type' | 'difficulty'>> = {
+  notes: {
+    title: "זיהוי תווים בסיסיים",
+    description: "תרגול קריאת תווים על פסי התווים",
+    steps: [
+      "נגן את התו דו (C) — מצא אותו על הכלי שלך",
+      "נגן את הסדרה: דו-רה-מי-פה-סול (C-D-E-F-G) לאט",
+      "חזור 3 פעמים — עולה וגם יורד",
+    ],
+    tip: "קרא את שם התו בקול לפני שאתה מנגן אותו",
+  },
+  rhythm: {
+    title: "דפוס מקצב בסיסי",
+    description: "תרגול ספירה וניגון מקצב",
+    steps: [
+      "ספור בקול: 1-2-3-4 בקצב איטי (♩♩♩♩)",
+      "הקש את המקצב על הברך תוך כדי ספירה",
+      "נגן תוך כדי ספירה — 3 חזרות",
+    ],
+    tip: "שמור על קצב קבוע — עדיף איטי ומדויק מאשר מהיר ולא מדויק",
+  },
+  scales: {
+    title: "סולם דו מז'ור",
+    description: "תרגול עלייה וירידה בסולם דו מז'ור",
+    steps: [
+      "נגן עולה: דו-רה-מי-פה-סול-לה-סי-דו (C-D-E-F-G-A-B-C)",
+      "נגן יורד: דו-סי-לה-סול-פה-מי-רה-דו",
+      "חזור 3 פעמים בקצב שנוח לך",
+    ],
+    tip: "שים לב לאצבעות — תנועה חלקה בין התווים",
+  },
+};
+
 const SKILL_CONTEXT: Record<SkillType, string> = {
-  notes: "קריאת תווים — זיהוי תווים על פסי התווים, מיקום על הכלי",
+  notes: "קריאת תווים — זיהוי תווים על פסי התווים. חייב לכלול תווים ספציפיים: דו (C), רה (D), מי (E), פה (F), סול (G), לה (A), סי (B)",
   rhythm: "מקצבים — ניקוד מקצבי, דפוסי קצב, ספירה",
   scales: "סולמות — נגינת סולמות, טרמולו, תרגולי אצבעות",
 };
@@ -43,7 +76,7 @@ export async function generateExercise(
   "tip": "טיפ קצר ופרקטי"
 }
 
-חשוב: התרגול חייב להתאים בדיוק ל-${durationMinutes} דקות. רמה ${difficultyLevel} = ${difficultyLevel <= 2 ? "פשוט מאוד, תנועות בסיסיות" : difficultyLevel <= 4 ? "דורש ריכוז, מספר צעדים" : "מאתגר, דורש מיומנות"}.`;
+חשוב: התרגול חייב להתאים בדיוק ל-${durationMinutes} דקות. רמה ${difficultyLevel} = ${difficultyLevel <= 2 ? "פשוט מאוד, תנועות בסיסיות" : difficultyLevel <= 4 ? "דורש ריכוז, מספר צעדים" : "מאתגר, דורש מיומנות"}.${skillType === 'notes' ? `\nחשוב מאוד: בשלבים חייב לכלול תווים ספציפיים לנגינה, למשל: "נגן את התו דו (C)" או "זהה ונגן: רה-מי-פה-סול". אל תכתוב שלבים גנריים.` : ''}`;
 
   let message;
   try {
@@ -56,11 +89,9 @@ export async function generateExercise(
     console.error("Anthropic API error:", JSON.stringify(err, null, 2));
     console.error("API key length:", process.env.ANTHROPIC_API_KEY?.length);
     console.error("API key starts with:", process.env.ANTHROPIC_API_KEY?.substring(0, 15));
+    const fallback = FALLBACKS[skillType];
     return {
-      title: `תרגול ${SKILL_CONTEXT[skillType].split(" — ")[0]}`,
-      description: `תרגול ${durationMinutes} דקות ברמה ${difficultyLevel}`,
-      steps: ["נגן בקצב איטי ומדויק", "חזור 3 פעמים על כל שלב", "האיץ בהדרגה כשמרגיש בנוח"],
-      tip: "התרכז בדיוק, לא במהירות",
+      ...fallback,
       skill_type: skillType,
       difficulty: difficultyLevel,
     };
@@ -76,11 +107,9 @@ export async function generateExercise(
       difficulty: difficultyLevel,
     };
   } catch {
+    const fallback = FALLBACKS[skillType];
     return {
-      title: `תרגול ${SKILL_CONTEXT[skillType].split(" — ")[0]}`,
-      description: `תרגול ${durationMinutes} דקות ברמה ${difficultyLevel}`,
-      steps: ["נגן בקצב איטי", "חזור 3 פעמים", "האיץ בהדרגה"],
-      tip: "התרכז בדיוק, לא במהירות",
+      ...fallback,
       skill_type: skillType,
       difficulty: difficultyLevel,
     };
