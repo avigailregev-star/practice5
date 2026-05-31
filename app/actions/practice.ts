@@ -1,5 +1,6 @@
 "use server";
 import { redirect } from "next/navigation";
+import { isRedirectError } from "next/dist/client/components/redirect-error";
 import { createClient } from "@/lib/supabase/server";
 import { generateExercise, type SkillType } from "@/lib/ai/generate-exercise";
 import { XP_PER_SESSION, calculateLevelUp } from "@/lib/gamification/xp";
@@ -9,39 +10,51 @@ type Profile = { level: number; xp: number };
 type Session = { id: string; student_id: string; duration_minutes: 5 | 10 | 15 | 20; skill_type: string; difficulty_level: number };
 
 export async function startPracticeSession(formData: FormData) {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) redirect("/login");
+  try {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) redirect("/login");
 
-  const durationMinutes = Number(formData.get("duration")) as 5 | 10 | 15 | 20;
-  const skillType = formData.get("skill") as SkillType;
+    const durationMinutes = Number(formData.get("duration")) as 5 | 10 | 15 | 20;
+    const skillType = formData.get("skill") as SkillType;
 
-  const profileResult = await supabase
-    .from("profiles")
-    .select("level, xp")
-    .eq("id", user.id)
-    .single() as unknown as { data: Profile | null; error: unknown };
+    const profileResult = await supabase
+      .from("profiles")
+      .select("level, xp")
+      .eq("id", user.id)
+      .single() as unknown as { data: Profile | null; error: unknown };
 
-  const profile = profileResult.data;
-  const difficultyLevel = profile?.level ?? 1;
+    const profile = profileResult.data;
+    const difficultyLevel = profile?.level ?? 1;
 
-  const exercise = await generateExercise(skillType, durationMinutes, difficultyLevel);
+    let exercise;
+    try {
+      exercise = await generateExercise(skillType, durationMinutes, difficultyLevel);
+    } catch (err) {
+      console.error("Exercise generation failed:", err);
+      redirect("/practice?error=ai_failed");
+    }
 
-  const sessionResult = await supabase
-    .from("practice_sessions")
-    .insert({
-      student_id: user.id,
-      duration_minutes: durationMinutes,
-      skill_type: skillType,
-      difficulty_level: difficultyLevel,
-      exercise_content: exercise as unknown as Record<string, unknown>,
-    } as never)
-    .select("id")
-    .single() as unknown as { data: { id: string } | null; error: unknown };
+    const sessionResult = await supabase
+      .from("practice_sessions")
+      .insert({
+        student_id: user.id,
+        duration_minutes: durationMinutes,
+        skill_type: skillType,
+        difficulty_level: difficultyLevel,
+        exercise_content: JSON.parse(JSON.stringify(exercise)),
+      } as never)
+      .select("id")
+      .single() as unknown as { data: { id: string } | null; error: unknown };
 
-  if (sessionResult.error || !sessionResult.data) redirect("/practice?error=session_failed");
+    if (sessionResult.error || !sessionResult.data) redirect("/practice?error=session_failed");
 
-  redirect(`/practice/exercise?session=${sessionResult.data!.id}`);
+    redirect(`/practice/exercise?session=${sessionResult.data!.id}`);
+  } catch (err) {
+    if (isRedirectError(err)) throw err;
+    console.error("startPracticeSession error:", err);
+    redirect("/practice?error=unknown");
+  }
 }
 
 export async function completePracticeSession(sessionId: string) {
