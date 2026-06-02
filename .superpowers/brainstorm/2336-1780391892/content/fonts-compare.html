@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="he">
+<head>
+<meta charset="UTF-8">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Outfit:wght@400;600;700;800&family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: #111; padding: 30px 20px; direction: rtl; }
+h2 { color: #fff; font-family: Inter, sans-serif; font-size: 20px; font-weight: 700; text-align: center; margin-bottom: 6px; }
+p.sub { color: #555; font-family: Inter, sans-serif; font-size: 13px; text-align: center; margin-bottom: 28px; }
+.grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; max-width: 700px; margin: 0 auto; }
+.card { background: #0f0f0f; border: 1px solid #222; border-radius: 16px; padding: 20px; cursor: pointer; transition: border-color 0.2s; }
+.card:hover { border-color: #c9a84c; }
+.card.selected { border-color: #c9a84c; background: #141200; }
+.font-tag { color: #555; font-size: 10px; letter-spacing: 2px; font-family: Inter, sans-serif; margin-bottom: 14px; }
+.sample { margin-bottom: 12px; }
+.big { font-size: 22px; font-weight: 800; color: #fff; line-height: 1.15; margin-bottom: 4px; }
+.med { font-size: 13px; font-weight: 600; color: #c9a84c; margin-bottom: 3px; }
+.small { font-size: 11px; color: #555; }
+.pill { display: inline-block; background: #1a1a1a; border: 1px solid #c9a84c; border-radius: 20px; padding: 5px 12px; font-size: 11px; font-weight: 700; color: #c9a84c; }
+.desc { color: #444; font-size: 11px; font-family: Inter, sans-serif; border-top: 1px solid #1a1a1a; padding-top: 10px; margin-top: 4px; }
+</style>
+</head>
+<body>
+<h2>בחרי גופן</h2>
+<p class="sub">כל הדוגמאות בסגנון Dark Gold</p>
+
+<div class="grid">
+
+  <div class="card" onclick="this.classList.toggle('selected')" data-choice="inter">
+    <div class="font-tag">INTER</div>
+    <div class="sample" style="font-family:'Inter',sans-serif">
+      <div class="big">שלום, עדי</div>
+      <div class="med">רמה 3 · קריאת תווים</div>
+      <div class="small">240 / 300 XP</div>
+    </div>
+    <div style="font-family:'Inter',sans-serif;margin-bottom:10px"><span class="pill">התחל תרגול</span></div>
+    <div class="desc">נקי, טכני, מוכר. הגופן של Figma ו-Linear.</div>
+  </div>
+
+  <div class="card" onclick="this.classList.toggle('selected')" data-choice="outfit">
+    <div class="font-tag">OUTFIT</div>
+    <div class="sample" style="font-family:'Outfit',sans-serif">
+      <div class="big">שלום, עדי</div>
+      <div class="med">רמה 3 · קריאת תווים</div>
+      <div class="small">240 / 300 XP</div>
+    </div>
+    <div style="font-family:'Outfit',sans-serif;margin-bottom:10px"><span class="pill">התחל תרגול</span></div>
+    <div class="desc">מעוגל ומודרני. מרגיש כמו אפליקציה עכשווית.</div>
+  </div>
+
+  <div class="card" onclick="this.classList.toggle('selected')" data-choice="jakarta">
+    <div class="font-tag">PLUS JAKARTA SANS</div>
+    <div class="sample" style="font-family:'Plus Jakarta Sans',sans-serif">
+      <div class="big">שלום, עדי</div>
+      <div class="med">רמה 3 · קריאת תווים</div>
+      <div class="small">240 / 300 XP</div>
+    </div>
+    <div style="font-family:'Plus Jakarta Sans',sans-serif;margin-bottom:10px"><span class="pill">התחל תרגול</span></div>
+    <div class="desc">אלגנטי ומשוכלל. פופולרי בעיצוב פרימיום.</div>
+  </div>
+
+  <div class="card" onclick="this.classList.toggle('selected')" data-choice="syne">
+    <div class="font-tag">SYNE (כותרות) + INTER (גוף)</div>
+    <div class="sample">
+      <div class="big" style="font-family:'Syne',sans-serif">שלום, עדי</div>
+      <div class="med" style="font-family:'Inter',sans-serif">רמה 3 · קריאת תווים</div>
+      <div class="small" style="font-family:'Inter',sans-serif">240 / 300 XP</div>
+    </div>
+    <div style="font-family:'Inter',sans-serif;margin-bottom:10px"><span class="pill">התחל תרגול</span></div>
+    <div class="desc">כותרות בולטות ודרמטיות, טקסט נקי. הכי ייחודי.</div>
+  </div>
+
+</div>
+</body>
+</html>

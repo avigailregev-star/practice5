@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="he">
+<head>
+<meta charset="UTF-8">
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: #0a0a0a; font-family: 'Rubik', sans-serif; padding: 30px 20px; direction: rtl; }
+h2 { color: #fff; font-size: 20px; font-weight: 700; text-align: center; margin-bottom: 6px; }
+p.sub { color: #555; font-size: 13px; text-align: center; margin-bottom: 28px; }
+.grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; max-width: 900px; margin: 0 auto; }
+.opt-label { color: #666; font-size: 11px; text-align: center; letter-spacing: 1px; margin-bottom: 8px; }
+.opt-desc { color: #444; font-size: 11px; text-align: center; line-height: 1.5; margin-top: 8px; }
+
+.preview {
+  height: 260px;
+  border-radius: 20px;
+  border: 2px solid #222;
+  position: relative;
+  overflow: hidden;
+  cursor: pointer;
+  transition: border-color 0.2s;
+  background: #0f0f0f;
+}
+.preview:hover { border-color: #c9a84c; }
+.preview.selected { border-color: #c9a84c; box-shadow: 0 0 0 2px rgba(201,168,76,0.25); }
+
+.phone-ui {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  padding: 18px;
+  background: linear-gradient(to top, rgba(10,10,10,1) 50%, transparent);
+  z-index: 10;
+}
+.ui-name { color: #fff; font-size: 20px; font-weight: 800; margin-bottom: 2px; }
+.ui-sub { color: #c9a84c; font-size: 10px; letter-spacing: 1px; }
+
+/* shared bar setup */
+.wave-wrap {
+  position: absolute;
+  bottom: 70px;
+  left: 0; right: 0;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 3px;
+  padding: 0 14px;
+}
+.bar {
+  border-radius: 3px 3px 0 0;
+  animation: wave-bar ease-in-out infinite alternate;
+  flex-shrink: 0;
+}
+@keyframes wave-bar {
+  from { height: 4px; }
+  to   { height: var(--h); }
+}
+
+/* ── Version 1: subtle (original) ── */
+.v1 .bar { width: 3px; background: linear-gradient(to top, #c9a84c44, transparent); }
+.v1 .wave-wrap { opacity: 0.35; }
+
+/* ── Version 2: medium ── */
+.v2 .bar { width: 4px; background: linear-gradient(to top, #c9a84c, #c9a84c22); }
+.v2 .wave-wrap { opacity: 0.55; }
+
+/* ── Version 3: bold ── */
+.v3 .bar { width: 4px; background: linear-gradient(to top, #c9a84c, transparent); }
+.v3 .wave-wrap { opacity: 0.85; }
+.v3 .bar:nth-child(even) { background: linear-gradient(to top, #e8c96d, transparent); }
+
+/* bar heights & timing */
+.b1  { --h:28px; animation-duration:0.8s; }
+.b2  { --h:52px; animation-duration:1.1s; animation-delay:0.1s; }
+.b3  { --h:22px; animation-duration:0.7s; animation-delay:0.2s; }
+.b4  { --h:68px; animation-duration:1.3s; animation-delay:0.05s; }
+.b5  { --h:38px; animation-duration:0.9s; animation-delay:0.3s; }
+.b6  { --h:58px; animation-duration:1.0s; animation-delay:0.15s; }
+.b7  { --h:18px; animation-duration:0.6s; animation-delay:0.25s; }
+.b8  { --h:75px; animation-duration:1.4s; animation-delay:0.4s; }
+.b9  { --h:32px; animation-duration:0.85s; animation-delay:0.1s; }
+.b10 { --h:48px; animation-duration:1.2s; animation-delay:0.35s; }
+.b11 { --h:25px; animation-duration:0.75s; animation-delay:0.2s; }
+.b12 { --h:62px; animation-duration:1.1s; animation-delay:0.05s; }
+.b13 { --h:35px; animation-duration:0.95s; animation-delay:0.3s; }
+.b14 { --h:55px; animation-duration:1.05s; animation-delay:0.45s; }
+.b15 { --h:20px; animation-duration:0.65s; animation-delay:0.15s; }
+.b16 { --h:45px; animation-duration:1.15s; animation-delay:0.0s; }
+.b17 { --h:30px; animation-duration:0.88s; animation-delay:0.25s; }
+.b18 { --h:60px; animation-duration:1.25s; animation-delay:0.1s; }
+.b19 { --h:40px; animation-duration:0.92s; animation-delay:0.35s; }
+.b20 { --h:24px; animation-duration:0.72s; animation-delay:0.2s; }
+</style>
+</head>
+<body>
+
+<h2>גלי מוזיקה — כמה חזק?</h2>
+<p class="sub">בחרי את העוצמה המתאימה</p>
+
+<div class="grid">
+
+  <!-- V1: Subtle -->
+  <div>
+    <p class="opt-label">עדין</p>
+    <div class="preview v1" onclick="sel(this)">
+      <div class="wave-wrap">
+        <div class="bar b1"></div><div class="bar b2"></div><div class="bar b3"></div>
+        <div class="bar b4"></div><div class="bar b5"></div><div class="bar b6"></div>
+        <div class="bar b7"></div><div class="bar b8"></div><div class="bar b9"></div>
+        <div class="bar b10"></div><div class="bar b11"></div><div class="bar b12"></div>
+        <div class="bar b13"></div><div class="bar b14"></div><div class="bar b15"></div>
+        <div class="bar b16"></div><div class="bar b17"></div><div class="bar b18"></div>
+        <div class="bar b19"></div><div class="bar b20"></div>
+      </div>
+      <div class="phone-ui">
+        <div class="ui-name">שלום, עדי</div>
+        <div class="ui-sub">רמה 3 · קריאת תווים</div>
+      </div>
+    </div>
+    <p class="opt-desc">רמז עדין לאנימציה. כמעט לא מורגש.</p>
+  </div>
+
+  <!-- V2: Medium -->
+  <div>
+    <p class="opt-label">בינוני — מומלץ</p>
+    <div class="preview v2" onclick="sel(this)">
+      <div class="wave-wrap">
+        <div class="bar b1"></div><div class="bar b2"></div><div class="bar b3"></div>
+        <div class="bar b4"></div><div class="bar b5"></div><div class="bar b6"></div>
+        <div class="bar b7"></div><div class="bar b8"></div><div class="bar b9"></div>
+        <div class="bar b10"></div><div class="bar b11"></div><div class="bar b12"></div>
+        <div class="bar b13"></div><div class="bar b14"></div><div class="bar b15"></div>
+        <div class="bar b16"></div><div class="bar b17"></div><div class="bar b18"></div>
+        <div class="bar b19"></div><div class="bar b20"></div>
+      </div>
+      <div class="phone-ui">
+        <div class="ui-name">שלום, עדי</div>
+        <div class="ui-sub">רמה 3 · קריאת תווים</div>
+      </div>
+    </div>
+    <p class="opt-desc">נראה, לא מסיח דעת. ממסגר את הUI יפה.</p>
+  </div>
+
+  <!-- V3: Bold -->
+  <div>
+    <p class="opt-label">בולט</p>
+    <div class="preview v3" onclick="sel(this)">
+      <div class="wave-wrap">
+        <div class="bar b1"></div><div class="bar b2"></div><div class="bar b3"></div>
+        <div class="bar b4"></div><div class="bar b5"></div><div class="bar b6"></div>
+        <div class="bar b7"></div><div class="bar b8"></div><div class="bar b9"></div>
+        <div class="bar b10"></div><div class="bar b11"></div><div class="bar b12"></div>
+        <div class="bar b13"></div><div class="bar b14"></div><div class="bar b15"></div>
+        <div class="bar b16"></div><div class="bar b17"></div><div class="bar b18"></div>
+        <div class="bar b19"></div><div class="bar b20"></div>
+      </div>
+      <div class="phone-ui">
+        <div class="ui-name">שלום, עדי</div>
+        <div class="ui-sub">רמה 3 · קריאת תווים</div>
+      </div>
+    </div>
+    <p class="opt-desc">זהב + זהב בהיר לסירוגין. דרמטי ומוסיקלי.</p>
+  </div>
+
+</div>
+
+<script>
+function sel(el) {
+  document.querySelectorAll('.preview').forEach(p => p.classList.remove('selected'));
+  el.classList.add('selected');
+}
+</script>
+</body>
+</html>

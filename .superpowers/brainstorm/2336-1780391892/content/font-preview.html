@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="he">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: #1a1a2e; font-family: 'DM Sans', sans-serif; display: flex; justify-content: center; align-items: flex-start; min-height: 100vh; padding: 30px 20px; gap: 20px; flex-wrap: wrap; direction: rtl; }
+
+  .phone { width: 220px; background: #0f0f0f; border-radius: 24px; overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,0.6); border: 1px solid #222; }
+  .phone-label { text-align: center; color: #555; font-size: 12px; margin-bottom: 12px; font-family: 'DM Sans', sans-serif; letter-spacing: 0.5px; }
+
+  /* Header */
+  .header { padding: 24px 18px 16px; border-bottom: 1px solid #1e1e1e; }
+  .brand { color: #c9a84c; font-size: 8px; letter-spacing: 3px; font-weight: 700; margin-bottom: 12px; }
+  .header-row { display: flex; justify-content: space-between; align-items: center; }
+  .greeting { color: #666; font-size: 11px; }
+  .name { color: #fff; font-size: 22px; font-weight: 800; line-height: 1.1; }
+  .avatar { width: 36px; height: 36px; border-radius: 50%; background: #c9a84c; display: flex; align-items: center; justify-content: center; color: #000; font-weight: 800; font-size: 14px; flex-shrink: 0; }
+  .xp-row { display: flex; justify-content: space-between; margin-top: 12px; margin-bottom: 5px; }
+  .xp-label { color: #c9a84c; font-size: 9px; letter-spacing: 1px; font-weight: 600; }
+  .xp-val { color: #444; font-size: 9px; }
+  .xp-bar { height: 2px; background: #1e1e1e; border-radius: 1px; }
+  .xp-fill { width: 80%; height: 100%; background: linear-gradient(90deg, #c9a84c, #e8c96d); border-radius: 1px; }
+
+  /* Week */
+  .section { padding: 14px 18px; border-bottom: 1px solid #1a1a1a; }
+  .section-label { color: #444; font-size: 8px; letter-spacing: 1.5px; font-weight: 600; margin-bottom: 10px; }
+  .week { display: flex; gap: 4px; }
+  .day { flex: 1; text-align: center; }
+  .day-name { font-size: 7px; color: #444; margin-bottom: 4px; }
+  .day-dot { width: 22px; height: 22px; border-radius: 50%; margin: 0 auto; }
+  .day-dot.done { background: #c9a84c; }
+  .day-dot.empty { background: #1a1a1a; border: 1px solid #252525; }
+
+  /* Skills */
+  .skills { padding: 14px 18px; }
+  .skill-item { padding: 11px 14px; border-radius: 10px; margin-bottom: 6px; display: flex; align-items: center; justify-content: space-between; }
+  .skill-item.active { background: #1a1a1a; border: 1px solid #c9a84c; }
+  .skill-item.inactive { background: #111; border: 1px solid #1a1a1a; }
+  .skill-name { font-size: 12px; font-weight: 600; }
+  .skill-item.active .skill-name { color: #fff; }
+  .skill-item.inactive .skill-name { color: #3a3a3a; }
+  .dot { width: 5px; height: 5px; border-radius: 50%; background: #c9a84c; }
+
+  /* Time buttons */
+  .time-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 12px; }
+  .time-btn { padding: 10px 0; border-radius: 8px; text-align: center; font-size: 13px; font-weight: 700; font-family: 'DM Sans', sans-serif; }
+  .time-btn.active { background: #c9a84c; color: #000; }
+  .time-btn.inactive { background: #1a1a1a; color: #333; border: 1px solid #222; }
+  .time-sub { font-size: 9px; font-weight: 400; margin-right: 2px; }
+
+  /* CTA */
+  .cta { background: #c9a84c; border-radius: 10px; padding: 13px; text-align: center; }
+  .cta-text { color: #000; font-size: 13px; font-weight: 800; letter-spacing: 0.5px; }
+
+  /* Exercise screen */
+  .exercise-header { padding: 20px 18px 14px; border-bottom: 1px solid #1e1e1e; display: flex; align-items: center; gap: 10px; }
+  .back { color: #444; font-size: 18px; }
+  .ex-title { color: #fff; font-size: 14px; font-weight: 700; }
+  .ex-sub { color: #555; font-size: 10px; }
+  .notation-area { margin: 14px; background: #1a1a1a; border-radius: 12px; padding: 16px; border: 1px solid #252525; }
+  .notation-label { color: #c9a84c; font-size: 8px; letter-spacing: 1.5px; font-weight: 600; margin-bottom: 10px; }
+  .staff-mock { height: 50px; border-radius: 4px; background: #111; display: flex; align-items: center; justify-content: center; position: relative; }
+  .staff-lines { position: absolute; width: 100%; }
+  .staff-line { height: 1px; background: #2a2a2a; margin: 7px 0; }
+  .note-mock { width: 12px; height: 12px; border-radius: 50%; background: #c9a84c; position: absolute; }
+  .instruction { color: #666; font-size: 10px; text-align: center; margin: 4px 0 10px; }
+  .reveal-btn { background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 8px; padding: 10px; text-align: center; }
+  .reveal-text { color: #555; font-size: 11px; font-weight: 600; }
+  .finish-btn { margin: 10px 14px 14px; background: #c9a84c; border-radius: 10px; padding: 13px; text-align: center; }
+  .finish-text { color: #000; font-size: 13px; font-weight: 800; }
+
+  /* Complete screen */
+  .complete-body { padding: 30px 18px; text-align: center; }
+  .trophy { width: 56px; height: 56px; border-radius: 50%; background: #1a1a1a; border: 1px solid #c9a84c; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; font-size: 24px; }
+  .complete-title { color: #fff; font-size: 18px; font-weight: 800; margin-bottom: 4px; }
+  .complete-sub { color: #555; font-size: 11px; margin-bottom: 20px; }
+  .xp-badge { background: #1a1a1a; border: 1px solid #c9a84c; border-radius: 12px; padding: 14px; margin-bottom: 16px; }
+  .xp-amount { color: #c9a84c; font-size: 28px; font-weight: 800; }
+  .xp-desc { color: #555; font-size: 10px; margin-top: 2px; }
+  .next-btn { background: #c9a84c; border-radius: 10px; padding: 13px; }
+  .next-text { color: #000; font-size: 13px; font-weight: 800; }
+
+  h2 { color: #fff; font-family: 'DM Sans', sans-serif; font-size: 22px; font-weight: 800; text-align: center; margin-bottom: 6px; }
+  p.sub { color: #666; font-family: 'DM Sans', sans-serif; font-size: 13px; text-align: center; margin-bottom: 30px; }
+  .screens { display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; }
+</style>
+</head>
+<body>
+<div style="width:100%">
+  <h2>DM Sans — כך ייראה Dark + Gold</h2>
+  <p class="sub">שלושה מסכים מרכזיים: דף הבית, עמוד תרגיל, מסך סיום</p>
+  <div class="screens">
+
+    <!-- HOME -->
+    <div>
+      <p class="phone-label">דף הבית</p>
+      <div class="phone">
+        <div class="header">
+          <div class="brand">PRACTICE5</div>
+          <div class="header-row">
+            <div>
+              <div class="greeting">שלום,</div>
+              <div class="name">עדי</div>
+            </div>
+            <div class="avatar">ע</div>
+          </div>
+          <div class="xp-row"><span class="xp-label">רמה 3</span><span class="xp-val">240 / 300 XP</span></div>
+          <div class="xp-bar"><div class="xp-fill"></div></div>
+        </div>
+        <div class="section">
+          <div class="section-label">השבוע</div>
+          <div class="week">
+            <div class="day"><div class="day-name">א</div><div class="day-dot done"></div></div>
+            <div class="day"><div class="day-name">ב</div><div class="day-dot done"></div></div>
+            <div class="day"><div class="day-name">ג</div><div class="day-dot empty"></div></div>
+            <div class="day"><div class="day-name">ד</div><div class="day-dot done"></div></div>
+            <div class="day"><div class="day-name">ה</div><div class="day-dot empty"></div></div>
+            <div class="day"><div class="day-name">ו</div><div class="day-dot empty"></div></div>
+            <div class="day"><div class="day-name">ש</div><div class="day-dot empty"></div></div>
+          </div>
+        </div>
+        <div class="skills">
+          <div class="section-label">כמה זמן?</div>
+          <div class="time-grid">
+            <div class="time-btn active">10 <span class="time-sub">דק'</span></div>
+            <div class="time-btn inactive">5 <span class="time-sub">דק'</span></div>
+            <div class="time-btn inactive">15 <span class="time-sub">דק'</span></div>
+            <div class="time-btn inactive">20 <span class="time-sub">דק'</span></div>
+          </div>
+          <div class="section-label" style="margin-bottom:8px">מה לתרגל?</div>
+          <div class="skill-item active"><span class="skill-name">קריאת תווים</span><span class="dot"></span></div>
+          <div class="skill-item inactive"><span class="skill-name">מקצבים</span></div>
+          <div class="skill-item inactive"><span class="skill-name">סולמות</span></div>
+          <div class="cta" style="margin-top:10px"><div class="cta-text">התחל תרגול</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- EXERCISE -->
+    <div>
+      <p class="phone-label">עמוד תרגיל</p>
+      <div class="phone">
+        <div class="exercise-header">
+          <span class="back">←</span>
+          <div>
+            <div class="ex-title">התרגול שלך</div>
+            <div class="ex-sub">10 דקות · קריאת תווים</div>
+          </div>
+        </div>
+        <div class="notation-area">
+          <div class="notation-label">זהה את התו</div>
+          <div class="staff-mock">
+            <div class="staff-lines">
+              <div class="staff-line"></div>
+              <div class="staff-line"></div>
+              <div class="staff-line"></div>
+              <div class="staff-line"></div>
+              <div class="staff-line"></div>
+            </div>
+            <div class="note-mock" style="top:14px;right:60px"></div>
+          </div>
+          <div class="instruction">נגן את התו הבא</div>
+          <div class="reveal-btn"><div class="reveal-text">גלה תשובה</div></div>
+        </div>
+        <div style="padding: 0 14px">
+          <div style="background:#111;border:1px solid #1a1a1a;border-radius:10px;padding:12px">
+            <div style="color:#555;font-size:9px;letter-spacing:1px;margin-bottom:6px">ההנחיה שלך</div>
+            <div style="color:#888;font-size:11px;line-height:1.5">נגן את התו פעמיים, האזן לעצמך והשתמש בקשת שלמה.</div>
+          </div>
+        </div>
+        <div class="finish-btn"><div class="finish-text">סיימתי</div></div>
+      </div>
+    </div>
+
+    <!-- COMPLETE -->
+    <div>
+      <p class="phone-label">מסך סיום</p>
+      <div class="phone">
+        <div class="complete-body">
+          <div class="trophy">★</div>
+          <div class="complete-title">תרגול הושלם</div>
+          <div class="complete-sub">עשית עבודה מצוינת</div>
+          <div class="xp-badge">
+            <div class="xp-amount">+25 XP</div>
+            <div class="xp-desc">ניקוד שהרווחת</div>
+          </div>
+          <div style="background:#1a1a1a;border-radius:10px;padding:12px;margin-bottom:14px;display:flex;justify-content:space-around">
+            <div style="text-align:center">
+              <div style="color:#fff;font-size:16px;font-weight:800">10</div>
+              <div style="color:#555;font-size:9px">דקות</div>
+            </div>
+            <div style="width:1px;background:#252525"></div>
+            <div style="text-align:center">
+              <div style="color:#c9a84c;font-size:16px;font-weight:800">רמה 3</div>
+              <div style="color:#555;font-size:9px">רמה נוכחית</div>
+            </div>
+          </div>
+          <div class="next-btn"><div class="next-text">לתרגול הבא</div></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="he">
+<head>
+<meta charset="UTF-8">
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;600;700;800&family=Rubik:wght@400;600;700;800&family=Assistant:wght@400;600;700;800&family=Secular+One&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: #111; padding: 30px 20px; direction: rtl; }
+h2 { color: #fff; font-family: Heebo, sans-serif; font-size: 20px; font-weight: 700; text-align: center; margin-bottom: 6px; }
+p.sub { color: #555; font-family: Heebo, sans-serif; font-size: 13px; text-align: center; margin-bottom: 28px; }
+.grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; max-width: 700px; margin: 0 auto; }
+.card { background: #0f0f0f; border: 1px solid #222; border-radius: 16px; padding: 20px; cursor: pointer; transition: border-color 0.2s; }
+.card:hover { border-color: #c9a84c; }
+.card.selected { border-color: #c9a84c; background: #141200; }
+.font-tag { color: #555; font-size: 10px; letter-spacing: 2px; font-family: Heebo, sans-serif; margin-bottom: 14px; }
+.big { font-size: 24px; font-weight: 800; color: #fff; line-height: 1.15; margin-bottom: 4px; }
+.med { font-size: 13px; font-weight: 600; color: #c9a84c; margin-bottom: 3px; }
+.small { font-size: 11px; color: #555; margin-bottom: 12px; }
+.pill { display: inline-block; background: #1a1a1a; border: 1px solid #c9a84c; border-radius: 20px; padding: 5px 14px; font-size: 11px; font-weight: 700; color: #c9a84c; }
+.desc { color: #444; font-size: 11px; font-family: Heebo, sans-serif; border-top: 1px solid #1a1a1a; padding-top: 10px; margin-top: 10px; line-height: 1.5; }
+</style>
+</head>
+<body>
+<h2>בחרי גופן</h2>
+<p class="sub">גופנים עם תמיכה מלאה בעברית — כולם בסגנון Dark Gold</p>
+
+<div class="grid">
+
+  <div class="card" onclick="this.classList.toggle('selected')">
+    <div class="font-tag">HEEBO</div>
+    <div style="font-family:'Heebo',sans-serif">
+      <div class="big">שלום, עדי</div>
+      <div class="med">רמה 3 · קריאת תווים</div>
+      <div class="small">240 / 300 XP</div>
+      <span class="pill">התחל תרגול</span>
+    </div>
+    <div class="desc">הגופן הנפוץ ביותר באפליקציות ישראליות. נקי, קריא, מוכר.</div>
+  </div>
+
+  <div class="card" onclick="this.classList.toggle('selected')">
+    <div class="font-tag">RUBIK</div>
+    <div style="font-family:'Rubik',sans-serif">
+      <div class="big">שלום, עדי</div>
+      <div class="med">רמה 3 · קריאת תווים</div>
+      <div class="small">240 / 300 XP</div>
+      <span class="pill">התחל תרגול</span>
+    </div>
+    <div class="desc">מעוגל מעט יותר מ-Heebo. מרגיש חם ונגיש — פופולרי מאוד.</div>
+  </div>
+
+  <div class="card" onclick="this.classList.toggle('selected')">
+    <div class="font-tag">ASSISTANT</div>
+    <div style="font-family:'Assistant',sans-serif">
+      <div class="big">שלום, עדי</div>
+      <div class="med">רמה 3 · קריאת תווים</div>
+      <div class="small">240 / 300 XP</div>
+      <span class="pill">התחל תרגול</span>
+    </div>
+    <div class="desc">דק ואלגנטי. הכי "מינימליסטי" מבין הארבעה.</div>
+  </div>
+
+  <div class="card" onclick="this.classList.toggle('selected')">
+    <div class="font-tag">SECULAR ONE</div>
+    <div>
+      <div class="big" style="font-family:'Secular One',sans-serif">שלום, עדי</div>
+      <div class="med" style="font-family:'Heebo',sans-serif">רמה 3 · קריאת תווים</div>
+      <div class="small" style="font-family:'Heebo',sans-serif">240 / 300 XP</div>
+      <span class="pill" style="font-family:'Heebo',sans-serif">התחל תרגול</span>
+    </div>
+    <div class="desc">כותרות ב-Secular One (בולד ודרמטי) + Heebo לגוף. הכי ייחודי.</div>
+  </div>
+
+</div>
+</body>
+</html>

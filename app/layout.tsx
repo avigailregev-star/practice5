@@ -2,7 +2,12 @@ import type { Metadata } from "next";
 import { Rubik } from "next/font/google";
 import "./globals.css";
 
-const rubik = Rubik({ subsets: ["hebrew", "latin"], variable: "--font-rubik" });
+const rubik = Rubik({
+  subsets: ["hebrew", "latin"],
+  variable: "--font-rubik",
+  display: "swap",
+  preload: false,
+});
 
 export const metadata: Metadata = {
   title: "Practice5 — חכם, מהיר, מוזיקלי",
