@@ -2,23 +2,26 @@
 import type { Exercise } from "@/lib/ai/generate-exercise";
 import dynamic from "next/dynamic";
 import NoteAnswer from "./NoteAnswer";
+import { Music, Activity, Layers, Lightbulb } from "lucide-react";
 const MusicNotation = dynamic(() => import("./MusicNotation"), { ssr: false });
 const RhythmNotation = dynamic(() => import("./RhythmNotation"), { ssr: false });
 
-const SKILL_EMOJI: Record<string, string> = {
-  notes: "🎼",
-  rhythm: "🥁",
-  scales: "🎹",
+const SKILL_ICON: Record<string, React.ReactNode> = {
+  notes:  <Music size={22} strokeWidth={1.5} className="text-brand-gold" />,
+  rhythm: <Activity size={22} strokeWidth={1.5} className="text-brand-gold" />,
+  scales: <Layers size={22} strokeWidth={1.5} className="text-brand-gold" />,
 };
 
 export default function ExerciseCard({ exercise }: { exercise: Exercise }) {
   return (
-    <div className="bg-white rounded-3xl p-5 shadow-sm border border-gray-100">
-      <div className="flex items-center gap-2 mb-3">
-        <span className="text-3xl">{SKILL_EMOJI[exercise.skill_type]}</span>
+    <div className="bg-brand-surface rounded-2xl p-5 border border-brand-border">
+      <div className="flex items-center gap-3 mb-4">
+        <div className="w-10 h-10 rounded-full bg-brand-surface-2 border border-brand-border flex items-center justify-center flex-shrink-0">
+          {SKILL_ICON[exercise.skill_type]}
+        </div>
         <div>
-          <h2 className="font-bold text-lg text-gray-900">{exercise.title}</h2>
-          <p className="text-sm text-gray-500">{exercise.description}</p>
+          <h2 className="font-bold text-lg text-white">{exercise.title}</h2>
+          <p className="text-sm text-brand-muted">{exercise.description}</p>
         </div>
       </div>
 
@@ -41,12 +44,12 @@ export default function ExerciseCard({ exercise }: { exercise: Exercise }) {
         </div>
       )}
 
-      <div className="bg-gray-50 rounded-2xl p-4 mb-4">
-        <p className="text-xs font-semibold text-gray-400 mb-2">שלבים</p>
+      <div className="bg-brand-surface-2 rounded-xl p-4 mb-4 border border-brand-border">
+        <p className="text-xs font-semibold text-brand-muted tracking-widest mb-3">שלבים</p>
         <ol className="space-y-2">
           {exercise.steps.map((step, i) => (
-            <li key={i} className="flex gap-2 text-sm text-gray-700">
-              <span className="flex-shrink-0 w-5 h-5 bg-brand-red text-white rounded-full flex items-center justify-center text-xs font-bold">
+            <li key={i} className="flex gap-3 text-sm text-white">
+              <span className="flex-shrink-0 w-5 h-5 bg-brand-gold text-black rounded-full flex items-center justify-center text-xs font-bold">
                 {i + 1}
               </span>
               <span>{step.replace(/^שלב \d+:\s*/, "")}</span>
@@ -55,9 +58,9 @@ export default function ExerciseCard({ exercise }: { exercise: Exercise }) {
         </ol>
       </div>
 
-      <div className="bg-yellow-50 rounded-2xl px-4 py-3 flex gap-2">
-        <span>💡</span>
-        <p className="text-sm text-yellow-800">{exercise.tip}</p>
+      <div className="bg-brand-surface-2 rounded-xl px-4 py-3 flex gap-3 border border-brand-border">
+        <Lightbulb size={16} strokeWidth={1.5} className="text-brand-gold flex-shrink-0 mt-0.5" />
+        <p className="text-sm text-brand-muted">{exercise.tip}</p>
       </div>
     </div>
   );

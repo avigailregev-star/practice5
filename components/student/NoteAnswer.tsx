@@ -1,18 +1,14 @@
 "use client";
 import { useState } from "react";
+import { Eye, CheckCircle, XCircle } from "lucide-react";
 
 const NOTE_NAMES_HE: Record<string, string> = {
-  C: "דו",
-  D: "רה",
-  E: "מי",
-  F: "פה",
-  G: "סול",
-  A: "לה",
-  B: "סי",
+  C: "דו", D: "רה", E: "מי", F: "פה",
+  G: "סול", A: "לה", B: "סי",
 };
 
 function getNoteHebrew(note: string): string {
-  const name = note.slice(0, -1); // "C" from "C4"
+  const name = note.slice(0, -1);
   return NOTE_NAMES_HE[name] ?? name;
 }
 
@@ -25,52 +21,57 @@ export default function NoteAnswer({ notes }: { notes: string[] }) {
       {!revealed ? (
         <button
           onClick={() => setRevealed(true)}
-          className="w-full border-2 border-brand-red text-brand-red rounded-2xl py-3 font-semibold text-sm transition-all active:scale-95"
+          className="w-full flex items-center justify-center gap-2 border border-brand-border bg-brand-surface-2 text-brand-muted rounded-xl py-3 font-semibold text-sm transition-all hover:border-brand-gold hover:text-brand-gold active:scale-95"
         >
-          גלה תשובה 👁️
+          <Eye size={16} strokeWidth={1.5} />
+          גלה תשובה
         </button>
       ) : (
         <div className="space-y-3">
-          {/* Note names */}
-          <div className="bg-green-50 rounded-2xl p-4">
-            <p className="text-xs text-gray-500 mb-2 text-center">התווים הם:</p>
-            <div className="flex justify-center gap-3 flex-wrap">
+          <div className="bg-brand-surface rounded-xl p-4 border border-brand-border">
+            <p className="text-xs text-brand-muted mb-2 text-center">התווים הם:</p>
+            <div className="flex justify-center gap-4 flex-wrap">
               {notes.map((note, i) => (
                 <div key={i} className="flex flex-col items-center">
-                  <span className="text-xl font-bold text-green-700">
+                  <span className="text-xl font-bold text-brand-gold">
                     {getNoteHebrew(note)}
                   </span>
-                  <span className="text-xs text-gray-400">{note.slice(0, -1)}</span>
+                  <span className="text-xs text-brand-muted">{note.slice(0, -1)}</span>
                 </div>
               ))}
             </div>
           </div>
 
-          {/* Self assessment */}
           {result === null ? (
             <div>
-              <p className="text-xs text-center text-gray-500 mb-2">קראת נכון?</p>
+              <p className="text-xs text-center text-brand-muted mb-2">קראת נכון?</p>
               <div className="grid grid-cols-2 gap-2">
                 <button
                   onClick={() => setResult("correct")}
-                  className="bg-green-100 text-green-700 rounded-2xl py-3 font-semibold text-sm border-2 border-green-200"
+                  className="flex items-center justify-center gap-2 bg-brand-surface border border-green-800 text-green-400 rounded-xl py-3 font-semibold text-sm"
                 >
-                  צדקתי ✅
+                  <CheckCircle size={16} strokeWidth={1.5} />
+                  צדקתי
                 </button>
                 <button
                   onClick={() => setResult("wrong")}
-                  className="bg-red-50 text-red-600 rounded-2xl py-3 font-semibold text-sm border-2 border-red-100"
+                  className="flex items-center justify-center gap-2 bg-brand-surface border border-red-900 text-red-400 rounded-xl py-3 font-semibold text-sm"
                 >
-                  טעיתי ❌
+                  <XCircle size={16} strokeWidth={1.5} />
+                  טעיתי
                 </button>
               </div>
             </div>
           ) : (
-            <div className={`rounded-2xl p-3 text-center ${result === "correct" ? "bg-green-100" : "bg-orange-50"}`}>
+            <div className={`rounded-xl p-3 text-center border ${
+              result === "correct"
+                ? "bg-green-950 border-green-800 text-green-400"
+                : "bg-orange-950 border-orange-800 text-orange-400"
+            }`}>
               {result === "correct" ? (
-                <p className="font-semibold text-green-700">מצוין! כל הכבוד 🌟</p>
+                <p className="font-semibold">מצוין! כל הכבוד</p>
               ) : (
-                <p className="font-semibold text-orange-700">לא נורא — תרגול עושה מושלם! 💪</p>
+                <p className="font-semibold">לא נורא — תרגול עושה מושלם</p>
               )}
             </div>
           )}

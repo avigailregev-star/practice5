@@ -2,18 +2,15 @@
 import { useEffect, useRef } from "react";
 
 interface RhythmNotationProps {
-  pattern: string; // ABC notation rhythm pattern e.g. "B B B/B/ B"
+  pattern: string;
 }
 
 export default function RhythmNotation({ pattern }: RhythmNotationProps) {
   const divRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (!divRef.current) return;
-
-    // Build ABC string with percussion clef look (using treble clef with B notes on middle line)
-    const abcString = `X:1\nT:\nM:4/4\nL:1/4\nK:C perc\n|${pattern}|`;
-
+    if (!divRef.current || !pattern) return;
+    const abcString = `X:1\nT:\nM:4/4\nL:1/4\nK:C\n|${pattern}|`;
     // @ts-ignore
     import("abcjs").then((abcjs) => {
       abcjs.renderAbc(divRef.current!, abcString, {
@@ -30,14 +27,13 @@ export default function RhythmNotation({ pattern }: RhythmNotationProps) {
   }, [pattern]);
 
   return (
-    <div className="bg-white rounded-2xl p-3 border border-gray-100">
-      <p className="text-xs text-gray-400 mb-1 text-center">הקש את המקצב</p>
-      <div ref={divRef} className="w-full" />
-      <div className="flex justify-center gap-4 mt-2 text-xs text-gray-400">
-        <span>♩ = פעימה</span>
-        <span>♪♪ = שתי שמיניות</span>
-        <span>𝅗𝅥 = חצי</span>
-      </div>
+    <div className="bg-brand-surface rounded-2xl p-3 border border-brand-border">
+      <p className="text-xs text-brand-muted mb-1 text-center">נגן את המקצב</p>
+      <div
+        ref={divRef}
+        className="w-full"
+        style={{ filter: "invert(1) brightness(1.8)" }}
+      />
     </div>
   );
 }
