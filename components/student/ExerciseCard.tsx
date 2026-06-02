@@ -7,20 +7,26 @@ const MusicNotation = dynamic(() => import("./MusicNotation"), { ssr: false });
 const RhythmNotation = dynamic(() => import("./RhythmNotation"), { ssr: false });
 
 const SKILL_ICON: Record<string, React.ReactNode> = {
-  notes:  <Music size={22} strokeWidth={1.5} className="text-brand-gold" />,
-  rhythm: <Activity size={22} strokeWidth={1.5} className="text-brand-gold" />,
-  scales: <Layers size={22} strokeWidth={1.5} className="text-brand-gold" />,
+  notes:  <Music size={22} strokeWidth={1.5} className="text-brand-pink" />,
+  rhythm: <Activity size={22} strokeWidth={1.5} className="text-brand-teal" />,
+  scales: <Layers size={22} strokeWidth={1.5} className="text-brand-purple" />,
+};
+
+const SKILL_ICON_BG: Record<string, string> = {
+  notes:  "bg-pink-100",
+  rhythm: "bg-teal-100",
+  scales: "bg-purple-100",
 };
 
 export default function ExerciseCard({ exercise }: { exercise: Exercise }) {
   return (
-    <div className="bg-brand-surface rounded-2xl p-5 border border-brand-border">
+    <div className="bg-brand-card rounded-2xl border border-brand-border p-4">
       <div className="flex items-center gap-3 mb-4">
-        <div className="w-10 h-10 rounded-full bg-brand-surface-2 border border-brand-border flex items-center justify-center flex-shrink-0">
+        <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${SKILL_ICON_BG[exercise.skill_type] ?? "bg-brand-border"}`}>
           {SKILL_ICON[exercise.skill_type]}
         </div>
         <div>
-          <h2 className="font-bold text-lg text-white">{exercise.title}</h2>
+          <h2 className="font-extrabold text-lg text-brand-text">{exercise.title}</h2>
           <p className="text-sm text-brand-muted">{exercise.description}</p>
         </div>
       </div>
@@ -44,12 +50,12 @@ export default function ExerciseCard({ exercise }: { exercise: Exercise }) {
         </div>
       )}
 
-      <div className="bg-brand-surface-2 rounded-xl p-4 mb-4 border border-brand-border">
+      <div className="bg-brand-card rounded-xl p-4 mb-4 border border-brand-border">
         <p className="text-xs font-semibold text-brand-muted tracking-widest mb-3">שלבים</p>
         <ol className="space-y-2">
           {exercise.steps.map((step, i) => (
-            <li key={i} className="flex gap-3 text-sm text-white">
-              <span className="flex-shrink-0 w-5 h-5 bg-brand-gold text-black rounded-full flex items-center justify-center text-xs font-bold">
+            <li key={i} className="flex gap-3 text-sm text-brand-text">
+              <span className="flex-shrink-0 w-5 h-5 bg-brand-pink text-white rounded-full flex items-center justify-center text-xs font-bold">
                 {i + 1}
               </span>
               <span>{step.replace(/^שלב \d+:\s*/, "")}</span>
@@ -58,7 +64,7 @@ export default function ExerciseCard({ exercise }: { exercise: Exercise }) {
         </ol>
       </div>
 
-      <div className="bg-brand-surface-2 rounded-xl px-4 py-3 flex gap-3 border border-brand-border">
+      <div className="bg-brand-card rounded-xl px-4 py-3 flex gap-3 border border-brand-border">
         <Lightbulb size={16} strokeWidth={1.5} className="text-brand-gold flex-shrink-0 mt-0.5" />
         <p className="text-sm text-brand-muted">{exercise.tip}</p>
       </div>

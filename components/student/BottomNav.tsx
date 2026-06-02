@@ -11,7 +11,7 @@ const TABS = [
 export default function BottomNav() {
   const pathname = usePathname();
   return (
-    <nav className="fixed bottom-0 right-0 left-0 bg-brand-surface border-t border-brand-border">
+    <nav className="fixed bottom-0 right-0 left-0 bg-brand-card border-t border-brand-border">
       <div className="flex">
         {TABS.map(({ href, label, Icon }) => {
           const active = pathname === href;
@@ -20,7 +20,7 @@ export default function BottomNav() {
               key={href}
               href={href}
               className={`flex-1 flex flex-col items-center py-3 gap-1 transition-colors ${
-                active ? "text-brand-gold" : "text-brand-muted"
+                active ? "text-brand-pink" : "text-brand-muted"
               }`}
             >
               <Icon size={20} strokeWidth={1.5} />
