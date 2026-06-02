@@ -4,6 +4,7 @@ import ExerciseCard from "@/components/student/ExerciseCard";
 import { completePracticeSession } from "@/app/actions/practice";
 import type { Exercise } from "@/lib/ai/generate-exercise";
 import Link from "next/link";
+import { ChevronRight } from "lucide-react";
 
 export default async function ExercisePage({
   searchParams,
@@ -43,11 +44,13 @@ export default async function ExercisePage({
 
   return (
     <main className="max-w-sm mx-auto px-4 pt-6 pb-24">
-      <div className="flex items-center gap-2 mb-5">
-        <Link href="/practice" className="text-gray-400 text-lg">→</Link>
+      <div className="flex items-center gap-3 mb-5">
+        <Link href="/practice" className="text-brand-muted hover:text-white transition-colors">
+          <ChevronRight size={22} strokeWidth={1.5} />
+        </Link>
         <div>
-          <h1 className="font-bold text-gray-900">התרגול שלך</h1>
-          <p className="text-sm text-gray-500">{session.duration_minutes} דקות</p>
+          <h1 className="font-bold text-white">התרגול שלך</h1>
+          <p className="text-sm text-brand-muted">{session.duration_minutes} דקות</p>
         </div>
       </div>
 
@@ -56,11 +59,11 @@ export default async function ExercisePage({
       <form className="mt-6">
         <button
           formAction={handleComplete}
-          className="w-full bg-brand-red text-white rounded-2xl py-4 font-bold text-lg shadow-lg transition-all active:scale-95"
+          className="w-full bg-brand-gold text-black rounded-2xl py-4 font-bold text-lg shadow-lg transition-all active:scale-95"
         >
-          סיימתי! ✅
+          סיימתי
         </button>
-        <p className="text-center text-xs text-gray-400 mt-3">
+        <p className="text-center text-xs text-brand-muted mt-3">
           לחץ רק כשסיימת את התרגול
         </p>
       </form>
