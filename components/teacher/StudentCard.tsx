@@ -1,9 +1,7 @@
-// components/teacher/StudentCard.tsx
-
 const SKILL_LABEL: Record<string, string> = {
-  notes: "קריאת תווים 🎼",
-  rhythm: "מקצבים 🥁",
-  scales: "סולמות 🎹",
+  notes: "קריאת תווים",
+  rhythm: "מקצבים",
+  scales: "סולמות",
 };
 
 function timeAgo(dateStr: string): string {
@@ -44,46 +42,43 @@ export default function StudentCard({
     : false;
 
   return (
-    <div className="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
+    <div className="bg-brand-surface rounded-2xl p-4 border border-brand-border">
       <div className="flex items-center gap-3">
-        {/* Avatar */}
         <div className={`w-11 h-11 rounded-full flex items-center justify-center text-lg font-bold flex-shrink-0 ${
-          practicedToday ? "bg-brand-red text-white" : "bg-gray-100 text-gray-500"
+          practicedToday ? "bg-brand-gold text-black" : "bg-brand-surface-2 text-brand-muted border border-brand-border"
         }`}>
           {initial}
         </div>
 
-        {/* Info */}
         <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2">
-            <span className="font-semibold text-gray-900">{name}</span>
-            <span className="text-xs bg-yellow-100 text-yellow-700 px-2 py-0.5 rounded-full">
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className="font-semibold text-white">{name}</span>
+            <span className="text-xs bg-brand-surface-2 text-brand-muted border border-brand-border px-2 py-0.5 rounded-full">
               רמה {level}
             </span>
             {practicedToday && (
-              <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">
-                תרגל היום ✓
+              <span className="text-xs bg-brand-surface border border-brand-gold text-brand-gold px-2 py-0.5 rounded-full">
+                תרגל היום
               </span>
             )}
           </div>
 
           {lastSession ? (
-            <div className="text-sm text-gray-500 mt-0.5 flex items-center gap-2 flex-wrap">
+            <div className="text-sm text-brand-muted mt-0.5 flex items-center gap-2 flex-wrap">
               <span>{SKILL_LABEL[lastSession.skill_type] ?? lastSession.skill_type}</span>
               <span>·</span>
-              <span>{lastSession.duration_minutes} דקות</span>
+              <span>{lastSession.duration_minutes} דק'</span>
               <span>·</span>
               <span>{timeAgo(lastSession.completed_at)}</span>
             </div>
           ) : (
-            <p className="text-sm text-gray-400 mt-0.5">טרם תרגל</p>
+            <p className="text-sm text-brand-muted mt-0.5">טרם תרגל</p>
           )}
         </div>
 
-        {/* Session count */}
         <div className="text-center flex-shrink-0">
-          <p className="text-lg font-bold text-brand-red">{sessionCount}</p>
-          <p className="text-xs text-gray-400">תרגולים</p>
+          <p className="text-lg font-bold text-brand-gold">{sessionCount}</p>
+          <p className="text-xs text-brand-muted">תרגולים</p>
         </div>
       </div>
     </div>
