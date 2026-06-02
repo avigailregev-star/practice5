@@ -33,16 +33,16 @@ export default async function ProfilePage() {
   const earnedTypes = new Set(achievements?.map((a) => a.achievement_type) ?? []);
 
   return (
-    <main className="max-w-sm mx-auto pb-24">
+    <main className="max-w-sm mx-auto pb-24 bg-brand-bg min-h-screen">
       {/* Header */}
-      <div className="bg-brand-surface px-5 pt-10 pb-6 border-b border-brand-border">
+      <div className="bg-gradient-to-br from-brand-purple to-brand-pink px-5 pt-10 pb-6">
         <div className="flex items-center gap-4 mb-4">
-          <div className="w-16 h-16 bg-brand-gold rounded-full flex items-center justify-center text-3xl font-bold text-black">
+          <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center text-3xl font-bold text-white">
             {(profile?.name ?? "?")[0]}
           </div>
           <div>
             <h1 className="text-xl font-bold text-white">{profile?.name ?? "תלמיד"}</h1>
-            <p className="text-sm text-brand-muted">רמה {profile?.level ?? 1}</p>
+            <p className="text-sm text-white/70">רמה {profile?.level ?? 1}</p>
           </div>
         </div>
         <XPBar xp={profile?.xp ?? 0} level={profile?.level ?? 1} />
@@ -50,19 +50,19 @@ export default async function ProfilePage() {
 
       {/* Stats */}
       <div className="mx-4 mt-4 grid grid-cols-2 gap-3">
-        <div className="bg-brand-surface rounded-2xl p-4 text-center border border-brand-border">
-          <p className="text-2xl font-bold text-brand-gold">{sessionCount ?? 0}</p>
+        <div className="bg-brand-card rounded-2xl p-4 text-center border border-brand-border">
+          <p className="text-2xl font-bold text-brand-pink">{sessionCount ?? 0}</p>
           <p className="text-sm text-brand-muted">תרגולים</p>
         </div>
-        <div className="bg-brand-surface rounded-2xl p-4 text-center border border-brand-border">
-          <p className="text-2xl font-bold text-brand-gold">{earnedTypes.size}</p>
+        <div className="bg-brand-card rounded-2xl p-4 text-center border border-brand-border">
+          <p className="text-2xl font-bold text-brand-pink">{earnedTypes.size}</p>
           <p className="text-sm text-brand-muted">הישגים</p>
         </div>
       </div>
 
       {/* Achievements */}
-      <div className="mx-4 mt-4 bg-brand-surface rounded-2xl p-4 border border-brand-border">
-        <h2 className="font-bold text-white mb-3">ארון גביעים</h2>
+      <div className="mx-4 mt-4 bg-brand-card rounded-2xl p-4 border border-brand-border">
+        <h2 className="font-bold text-brand-text mb-3">ארון גביעים</h2>
         <div className="grid grid-cols-3 gap-2">
           {ALL_ACHIEVEMENTS.map((type) => (
             <AchievementBadge key={type} type={type} locked={!earnedTypes.has(type)} />
@@ -75,7 +75,7 @@ export default async function ProfilePage() {
         <form>
           <button
             formAction={logout}
-            className="w-full flex items-center justify-center gap-2 border border-brand-border bg-brand-surface rounded-2xl py-3 text-brand-muted text-sm font-medium hover:border-brand-gold hover:text-white transition-all"
+            className="w-full flex items-center justify-center gap-2 border border-brand-border bg-brand-card rounded-2xl py-3 text-brand-muted text-sm font-medium hover:border-brand-pink/30 transition-all"
           >
             <LogOut size={16} strokeWidth={1.5} />
             יציאה

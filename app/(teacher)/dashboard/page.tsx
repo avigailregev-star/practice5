@@ -3,7 +3,6 @@ import { redirect } from "next/navigation";
 import StudentCard from "@/components/teacher/StudentCard";
 import TeacherStats from "@/components/teacher/TeacherStats";
 import { logout } from "@/app/actions/auth";
-import WaveBackground from "@/components/shared/WaveBackground";
 import { LogOut } from "lucide-react";
 
 export default async function DashboardPage() {
@@ -81,21 +80,19 @@ export default async function DashboardPage() {
   const practicedThisWeekIds = new Set(sessions.map((s) => s.student_id));
 
   return (
-    <main className="max-w-lg mx-auto relative">
-      <WaveBackground />
-
+    <main className="max-w-lg mx-auto bg-brand-bg min-h-screen">
       {/* Header */}
-      <div className="relative z-10 px-5 pt-10 pb-5 border-b border-brand-border">
-        <p className="text-xs text-brand-muted tracking-widest mb-1">PRACTICE5</p>
+      <div className="bg-gradient-to-br from-brand-teal to-brand-purple px-5 pt-10 pb-5">
+        <p className="text-white/70 text-xs tracking-widest font-semibold mb-1">PRACTICE5</p>
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-sm text-brand-muted">שלום,</p>
-            <h1 className="text-2xl font-bold text-white">{profile?.name ?? "מורה"}</h1>
+            <p className="text-sm text-white/70">שלום,</p>
+            <h1 className="text-xl font-extrabold text-white">{profile?.name ?? "מורה"}</h1>
           </div>
           <form>
             <button
               formAction={logout}
-              className="flex items-center gap-1.5 text-xs text-brand-muted border border-brand-border rounded-lg px-3 py-1.5 hover:border-brand-gold hover:text-white transition-all"
+              className="flex items-center gap-1.5 text-xs bg-white/20 text-white rounded-lg px-3 py-1.5 hover:bg-white/30 transition-all"
             >
               <LogOut size={13} strokeWidth={1.5} />
               יציאה
@@ -105,7 +102,7 @@ export default async function DashboardPage() {
       </div>
 
       {/* Stats */}
-      <div className="relative z-10 mt-4">
+      <div className="mt-4">
         <TeacherStats
           totalStudents={studentList.length}
           practicedToday={practicedTodayIds.size}
@@ -114,11 +111,11 @@ export default async function DashboardPage() {
       </div>
 
       {/* Student list */}
-      <div className="relative z-10 px-4">
-        <h2 className="font-bold text-brand-muted mb-3 text-xs tracking-widest">כל התלמידים</h2>
+      <div className="px-4">
+        <h2 className="font-bold text-brand-text mb-3">כל התלמידים</h2>
 
         {studentList.length === 0 ? (
-          <div className="bg-brand-surface rounded-2xl p-8 text-center border border-brand-border">
+          <div className="bg-brand-card rounded-2xl p-8 text-center border border-brand-border">
             <p className="text-brand-muted">אין תלמידים רשומים עדיין</p>
           </div>
         ) : (

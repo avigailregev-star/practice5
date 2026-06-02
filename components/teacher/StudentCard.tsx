@@ -42,22 +42,22 @@ export default function StudentCard({
     : false;
 
   return (
-    <div className="bg-brand-surface rounded-2xl p-4 border border-brand-border">
+    <div className="bg-brand-card rounded-2xl p-4 border border-brand-border">
       <div className="flex items-center gap-3">
         <div className={`w-11 h-11 rounded-full flex items-center justify-center text-lg font-bold flex-shrink-0 ${
-          practicedToday ? "bg-brand-gold text-black" : "bg-brand-surface-2 text-brand-muted border border-brand-border"
+          practicedToday ? "bg-brand-teal text-white" : "bg-brand-border text-brand-muted"
         }`}>
           {initial}
         </div>
 
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
-            <span className="font-semibold text-white">{name}</span>
-            <span className="text-xs bg-brand-surface-2 text-brand-muted border border-brand-border px-2 py-0.5 rounded-full">
+            <span className="font-bold text-brand-text">{name}</span>
+            <span className="text-xs bg-brand-bg text-brand-muted border border-brand-border px-2 py-0.5 rounded-full">
               רמה {level}
             </span>
             {practicedToday && (
-              <span className="text-xs bg-brand-surface border border-brand-gold text-brand-gold px-2 py-0.5 rounded-full">
+              <span className="text-xs bg-brand-teal/10 border border-brand-teal/20 text-brand-teal px-2 py-0.5 rounded-full">
                 תרגל היום
               </span>
             )}
@@ -77,7 +77,7 @@ export default function StudentCard({
         </div>
 
         <div className="text-center flex-shrink-0">
-          <p className="text-lg font-bold text-brand-gold">{sessionCount}</p>
+          <p className="text-lg font-bold text-brand-teal">{sessionCount}</p>
           <p className="text-xs text-brand-muted">תרגולים</p>
         </div>
       </div>
