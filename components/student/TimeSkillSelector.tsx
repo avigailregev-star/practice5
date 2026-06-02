@@ -51,7 +51,7 @@ export default function TimeSkillSelector() {
             <button
               key={s.value}
               onClick={() => setSkill(s.value)}
-              className={`flex items-center gap-3 px-4 py-3 rounded-2xl border-2 transition-all text-right ${
+              className={`flex items-center gap-3 px-4 py-3 rounded-2xl border-2 transition-all ${
                 skill === s.value
                   ? "bg-red-50 border-brand-red text-brand-red"
                   : "bg-white border-gray-200 text-gray-700"

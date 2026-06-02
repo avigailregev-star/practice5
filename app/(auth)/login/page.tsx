@@ -24,6 +24,7 @@ export default async function LoginPage({
             name="email"
             type="email"
             required
+            dir="rtl"
             className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-red"
             placeholder="you@example.com"
           />
@@ -36,6 +37,7 @@ export default async function LoginPage({
             name="password"
             type="password"
             required
+            dir="rtl"
             className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-red"
             placeholder="••••••••"
           />

@@ -44,7 +44,7 @@ export default async function ExercisePage({
   return (
     <main className="max-w-sm mx-auto px-4 pt-6 pb-24">
       <div className="flex items-center gap-2 mb-5">
-        <Link href="/practice" className="text-gray-400 text-lg">←</Link>
+        <Link href="/practice" className="text-gray-400 text-lg">→</Link>
         <div>
           <h1 className="font-bold text-gray-900">התרגול שלך</h1>
           <p className="text-sm text-gray-500">{session.duration_minutes} דקות</p>
