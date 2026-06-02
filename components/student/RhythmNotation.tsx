@@ -27,13 +27,17 @@ export default function RhythmNotation({ pattern }: RhythmNotationProps) {
   }, [pattern]);
 
   return (
-    <div className="bg-brand-surface rounded-2xl p-3 border border-brand-border">
-      <p className="text-xs text-brand-muted mb-1 text-center">נגן את המקצב</p>
-      <div
-        ref={divRef}
-        className="w-full"
-        style={{ filter: "invert(1) brightness(1.8)" }}
-      />
+    <div className="rounded-2xl border border-brand-border overflow-hidden">
+      <div className="bg-brand-surface px-3 pt-3 pb-1">
+        <p className="text-xs text-brand-muted text-center">נגן את המקצב</p>
+      </div>
+      <div className="bg-black">
+        <div
+          ref={divRef}
+          className="w-full"
+          style={{ filter: "invert(1) brightness(2)" }}
+        />
+      </div>
     </div>
   );
 }
