@@ -46,11 +46,11 @@ export default function MusicNotation({ notes, label = "קרא את התווים
       <div className="bg-brand-surface px-3 pt-3 pb-1">
         <p className="text-xs text-brand-muted text-center">{label}</p>
       </div>
-      <div className="bg-black">
+      <div className="bg-brand-surface px-2 pb-2">
         <div
           ref={divRef}
           className="w-full"
-          style={{ filter: "invert(1) brightness(2)" }}
+          style={{ background: "#faf9f6", borderRadius: "10px", padding: "12px 8px" }}
         />
       </div>
     </div>
