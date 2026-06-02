@@ -10,17 +10,16 @@ export default function WeeklyProgress({ practicedDays }: { practicedDays: numbe
         return (
           <div key={i} className="flex flex-col items-center gap-1">
             <div
-              className={`w-9 h-9 rounded-full flex items-center justify-center transition-all ${
+              className={`w-9 h-9 rounded-full flex items-center justify-center transition-all text-xs font-semibold ${
                 practiced
-                  ? "bg-brand-red text-white shadow-sm"
+                  ? "bg-brand-gold text-black shadow-sm"
                   : isToday
-                  ? "border-2 border-brand-red text-brand-red"
-                  : "bg-gray-100 text-gray-400"
+                  ? "border border-brand-gold text-brand-gold"
+                  : "bg-brand-surface text-brand-muted border border-brand-border"
               }`}
             >
-              {practiced ? "✓" : <span className="text-xs">{day}</span>}
+              {practiced ? "✓" : day}
             </div>
-            <span className="text-xs text-gray-400">{day}</span>
           </div>
         );
       })}
