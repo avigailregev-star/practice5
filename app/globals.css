@@ -1,13 +1,22 @@
 @import "tailwindcss";
 
 @theme {
-  --color-brand-dark: #0f0f0f;
+  --color-brand-bg: #f7f8fc;
+  --color-brand-card: #ffffff;
+  --color-brand-border: #edeef5;
+  --color-brand-text: #1a1a1a;
+  --color-brand-muted: #888888;
+  --color-brand-faint: #cccccc;
+  --color-brand-pink: #ff6b9d;
+  --color-brand-teal: #4ecdc4;
+  --color-brand-purple: #a29bfe;
+  --color-brand-orange: #ff9f43;
   --color-brand-gold: #c9a84c;
   --color-brand-gold-light: #e8c96d;
-  --color-brand-surface: #1a1a1a;
-  --color-brand-surface-2: #111111;
-  --color-brand-border: #222222;
-  --color-brand-muted: #666666;
+  /* keep these for any remaining refs */
+  --color-brand-dark: #1a1a1a;
+  --color-brand-surface: #ffffff;
+  --color-brand-surface-2: #f7f8fc;
   --font-sans: var(--font-rubik), sans-serif;
 }
 
@@ -21,8 +30,8 @@ input, textarea {
 }
 
 body {
-  background: #0f0f0f;
-  color: #ffffff;
+  background-color: #f7f8fc;
+  color: #1a1a1a;
   direction: rtl;
   text-align: right;
 }

@@ -17,7 +17,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="he" dir="rtl">
-      <body className={`${rubik.variable} font-sans bg-brand-dark text-white`}>
+      <body className={`${rubik.variable} font-sans bg-brand-bg text-brand-text`}>
         {children}
       </body>
     </html>
