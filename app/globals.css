@@ -1,5 +1,14 @@
 @import "tailwindcss";
 
+@font-face {
+  font-family: 'Miri';
+  src: url('/fonts/miri.woff') format('woff'),
+       url('/fonts/miri.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
 @theme {
   --color-brand-bg: #f7f8fc;
   --color-brand-card: #ffffff;
