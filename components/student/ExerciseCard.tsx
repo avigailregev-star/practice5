@@ -1,4 +1,7 @@
+"use client";
 import type { Exercise } from "@/lib/ai/generate-exercise";
+import dynamic from "next/dynamic";
+const MusicNotation = dynamic(() => import("./MusicNotation"), { ssr: false });
 
 const SKILL_EMOJI: Record<string, string> = {
   notes: "🎼",
@@ -16,6 +19,12 @@ export default function ExerciseCard({ exercise }: { exercise: Exercise }) {
           <p className="text-sm text-gray-500">{exercise.description}</p>
         </div>
       </div>
+
+      {exercise.skill_type === "notes" && exercise.notes_to_show && exercise.notes_to_show.length > 0 && (
+        <div className="mb-4">
+          <MusicNotation notes={exercise.notes_to_show} />
+        </div>
+      )}
 
       <div className="bg-gray-50 rounded-2xl p-4 mb-4">
         <p className="text-xs font-semibold text-gray-400 mb-2">שלבים</p>

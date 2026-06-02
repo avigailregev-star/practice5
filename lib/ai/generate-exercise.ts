@@ -9,6 +9,7 @@ export interface Exercise {
   tip: string;
   skill_type: SkillType;
   difficulty: number;
+  notes_to_show?: string[]; // e.g. ["C4", "D4", "E4"] for note exercises
 }
 
 const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
@@ -16,13 +17,14 @@ const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 const FALLBACKS: Record<SkillType, Omit<Exercise, 'skill_type' | 'difficulty'>> = {
   notes: {
     title: "זיהוי תווים בסיסיים",
-    description: "תרגול קריאת תווים על פסי התווים",
+    description: "מה התווים המופיעים על הפסים?",
     steps: [
-      "נגן את התו דו (C) — מצא אותו על הכלי שלך",
-      "נגן את הסדרה: דו-רה-מי-פה-סול (C-D-E-F-G) לאט",
-      "חזור 3 פעמים — עולה וגם יורד",
+      "הסתכל על כל תו — מה שמו?",
+      "נגן כל תו על הכלי שלך",
+      "חזור 3 פעמים עד שזורם",
     ],
     tip: "קרא את שם התו בקול לפני שאתה מנגן אותו",
+    notes_to_show: ["C4", "E4", "G4"],
   },
   rhythm: {
     title: "דפוס מקצב בסיסי",
@@ -73,10 +75,10 @@ export async function generateExercise(
     "שלב 2: הנחיה קצרה",
     "שלב 3: הנחיה קצרה"
   ],
-  "tip": "טיפ קצר ופרקטי"
+  "tip": "טיפ קצר ופרקטי"${skillType === 'notes' ? `,\n  "notes_to_show": ["C4", "D4", "E4"]` : ''}
 }
 
-חשוב: התרגול חייב להתאים בדיוק ל-${durationMinutes} דקות. רמה ${difficultyLevel} = ${difficultyLevel <= 2 ? "פשוט מאוד, תנועות בסיסיות" : difficultyLevel <= 4 ? "דורש ריכוז, מספר צעדים" : "מאתגר, דורש מיומנות"}.${skillType === 'notes' ? `\nחשוב מאוד: בשלבים חייב לכלול תווים ספציפיים לנגינה, למשל: "נגן את התו דו (C)" או "זהה ונגן: רה-מי-פה-סול". אל תכתוב שלבים גנריים.` : ''}`;
+חשוב: התרגול חייב להתאים בדיוק ל-${durationMinutes} דקות. רמה ${difficultyLevel} = ${difficultyLevel <= 2 ? "פשוט מאוד, תנועות בסיסיות" : difficultyLevel <= 4 ? "דורש ריכוז, מספר צעדים" : "מאתגר, דורש מיומנות"}.${skillType === 'notes' ? `\nחשוב מאוד: בשלבים חייב לכלול תווים ספציפיים לנגינה, למשל: "נגן את התו דו (C)" או "זהה ונגן: רה-מי-פה-סול". אל תכתוב שלבים גנריים.\nהוסף גם שדה "notes_to_show" עם 3-5 תווים בסימון מדעי (למשל: ["C4", "D4", "E4", "F4", "G4"]) שיוצגו כתווים אמיתיים על הפסים.` : ''}`;
 
   let message;
   try {
