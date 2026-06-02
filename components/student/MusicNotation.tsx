@@ -3,6 +3,7 @@ import { useEffect, useRef } from "react";
 
 interface MusicNotationProps {
   notes: string[]; // e.g. ["C4", "E4", "G4"]
+  label?: string;
 }
 
 // Convert scientific notation to ABC notation
@@ -26,7 +27,7 @@ function toAbcNote(note: string): string {
   return abc;
 }
 
-export default function MusicNotation({ notes }: MusicNotationProps) {
+export default function MusicNotation({ notes, label = "קרא את התווים" }: MusicNotationProps) {
   const divRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -52,7 +53,7 @@ export default function MusicNotation({ notes }: MusicNotationProps) {
 
   return (
     <div className="bg-white rounded-2xl p-3 border border-gray-100">
-      <p className="text-xs text-gray-400 mb-1 text-center">קרא את התווים</p>
+      <p className="text-xs text-gray-400 mb-1 text-center">{label}</p>
       <div ref={divRef} className="w-full" />
     </div>
   );

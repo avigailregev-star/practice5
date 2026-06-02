@@ -11,6 +11,7 @@ export interface Exercise {
   difficulty: number;
   notes_to_show?: string[]; // e.g. ["C4", "D4", "E4"] for note exercises
   rhythm_pattern?: string;  // for rhythm exercises - ABC notation
+  scale_notes?: string[]; // e.g. ["C4","D4","E4","F4","G4","A4","B4","C5"] for scales exercises
 }
 
 const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
@@ -47,6 +48,7 @@ const FALLBACKS: Record<SkillType, Omit<Exercise, 'skill_type' | 'difficulty'>> 
       "חזור 3 פעמים בקצב שנוח לך",
     ],
     tip: "שים לב לאצבעות — תנועה חלקה בין התווים",
+    scale_notes: ["C4","D4","E4","F4","G4","A4","B4","C5"],
   },
 };
 
@@ -77,10 +79,10 @@ export async function generateExercise(
     "שלב 2: הנחיה קצרה",
     "שלב 3: הנחיה קצרה"
   ],
-  "tip": "טיפ קצר ופרקטי"${skillType === 'notes' ? `,\n  "notes_to_show": ["C4", "D4", "E4"]` : ''}${skillType === 'rhythm' ? `,\n  "rhythm_pattern": "B B B/B/ B"` : ''}
+  "tip": "טיפ קצר ופרקטי"${skillType === 'notes' ? `,\n  "notes_to_show": ["C4", "D4", "E4"]` : ''}${skillType === 'rhythm' ? `,\n  "rhythm_pattern": "B B B/B/ B"` : ''}${skillType === 'scales' ? `,\n  "scale_notes": ["C4", "D4", "E4", "F4", "G4", "A4", "B4", "C5"]` : ''}
 }
 
-חשוב: התרגול חייב להתאים בדיוק ל-${durationMinutes} דקות. רמה ${difficultyLevel} = ${difficultyLevel <= 2 ? "פשוט מאוד, תנועות בסיסיות" : difficultyLevel <= 4 ? "דורש ריכוז, מספר צעדים" : "מאתגר, דורש מיומנות"}.${skillType === 'notes' ? `\nחשוב מאוד: בשלבים חייב לכלול תווים ספציפיים לנגינה, למשל: "נגן את התו דו (C)" או "זהה ונגן: רה-מי-פה-סול". אל תכתוב שלבים גנריים.\nהוסף גם שדה "notes_to_show" עם 3-5 תווים בסימון מדעי (למשל: ["C4", "D4", "E4", "F4", "G4"]) שיוצגו כתווים אמיתיים על הפסים.` : ''}${skillType === 'rhythm' ? `\nחשוב מאוד: החזר גם שדה "rhythm_pattern" עם דפוס מקצב ב-ABC notation. השתמש ב-B לתו רבע, B2 לתו חצי, B4 לתו שלם, B/ לתו שמינית. לדוגמה: "B B B/B/ B" או "B2 B B/ B/ B". הדפוס צריך להתאים לרמה ${difficultyLevel}.` : ''}`;
+חשוב: התרגול חייב להתאים בדיוק ל-${durationMinutes} דקות. רמה ${difficultyLevel} = ${difficultyLevel <= 2 ? "פשוט מאוד, תנועות בסיסיות" : difficultyLevel <= 4 ? "דורש ריכוז, מספר צעדים" : "מאתגר, דורש מיומנות"}.${skillType === 'notes' ? `\nחשוב מאוד: בשלבים חייב לכלול תווים ספציפיים לנגינה, למשל: "נגן את התו דו (C)" או "זהה ונגן: רה-מי-פה-סול". אל תכתוב שלבים גנריים.\nהוסף גם שדה "notes_to_show" עם 3-5 תווים בסימון מדעי (למשל: ["C4", "D4", "E4", "F4", "G4"]) שיוצגו כתווים אמיתיים על הפסים.` : ''}${skillType === 'rhythm' ? `\nחשוב מאוד: החזר גם שדה "rhythm_pattern" עם דפוס מקצב ב-ABC notation. השתמש ב-B לתו רבע, B2 לתו חצי, B4 לתו שלם, B/ לתו שמינית. לדוגמה: "B B B/B/ B" או "B2 B B/ B/ B". הדפוס צריך להתאים לרמה ${difficultyLevel}.` : ''}${skillType === 'scales' ? `\nחשוב מאוד: החזר גם שדה "scale_notes" עם מערך של תווי הסולם ב-scientific notation (כמו "C4","D4","E4"). כלול 5-8 תווים שמרכיבים את הסולם.` : ''}`;
 
   let message;
   try {

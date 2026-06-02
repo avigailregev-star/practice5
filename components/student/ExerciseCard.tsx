@@ -35,6 +35,12 @@ export default function ExerciseCard({ exercise }: { exercise: Exercise }) {
         </div>
       )}
 
+      {exercise.skill_type === "scales" && exercise.scale_notes && exercise.scale_notes.length > 0 && (
+        <div className="mb-4">
+          <MusicNotation notes={exercise.scale_notes} label="נגן את הסולם" />
+        </div>
+      )}
+
       <div className="bg-gray-50 rounded-2xl p-4 mb-4">
         <p className="text-xs font-semibold text-gray-400 mb-2">שלבים</p>
         <ol className="space-y-2">
