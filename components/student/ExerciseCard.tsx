@@ -3,6 +3,7 @@ import type { Exercise } from "@/lib/ai/generate-exercise";
 import dynamic from "next/dynamic";
 import NoteAnswer from "./NoteAnswer";
 const MusicNotation = dynamic(() => import("./MusicNotation"), { ssr: false });
+const RhythmNotation = dynamic(() => import("./RhythmNotation"), { ssr: false });
 
 const SKILL_EMOJI: Record<string, string> = {
   notes: "🎼",
@@ -25,6 +26,12 @@ export default function ExerciseCard({ exercise }: { exercise: Exercise }) {
         <div className="mb-4">
           <MusicNotation notes={exercise.notes_to_show} />
           <NoteAnswer notes={exercise.notes_to_show} />
+        </div>
+      )}
+
+      {exercise.skill_type === "rhythm" && exercise.rhythm_pattern && (
+        <div className="mb-4">
+          <RhythmNotation pattern={exercise.rhythm_pattern} />
         </div>
       )}
 
