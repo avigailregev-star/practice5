@@ -8,16 +8,16 @@ export default async function LoginPage({
 }) {
   const { error } = await searchParams;
   return (
-    <div className="bg-white rounded-2xl p-6 shadow-xl">
-      <h2 className="text-xl font-bold text-center mb-6">כניסה</h2>
+    <div className="bg-brand-surface rounded-2xl p-6 border border-brand-border">
+      <h2 className="text-xl font-bold text-center text-white mb-6">כניסה</h2>
       {error && (
-        <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-lg px-3 py-2 mb-4">
+        <div className="bg-red-900/30 border border-red-700 text-red-400 text-sm rounded-lg px-3 py-2 mb-4">
           {error}
         </div>
       )}
       <form className="space-y-4">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label className="block text-sm font-medium text-brand-muted mb-1">
             אימייל
           </label>
           <input
@@ -25,12 +25,12 @@ export default async function LoginPage({
             type="email"
             required
             dir="rtl"
-            className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-red"
+            className="w-full bg-brand-surface-2 border border-brand-border rounded-lg px-3 py-2.5 text-sm text-white focus:outline-none focus:border-brand-gold placeholder:text-brand-muted"
             placeholder="you@example.com"
           />
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label className="block text-sm font-medium text-brand-muted mb-1">
             סיסמה
           </label>
           <input
@@ -38,20 +38,20 @@ export default async function LoginPage({
             type="password"
             required
             dir="rtl"
-            className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-brand-red"
+            className="w-full bg-brand-surface-2 border border-brand-border rounded-lg px-3 py-2.5 text-sm text-white focus:outline-none focus:border-brand-gold placeholder:text-brand-muted"
             placeholder="••••••••"
           />
         </div>
         <button
           formAction={login}
-          className="w-full bg-brand-red text-white rounded-lg py-2.5 font-semibold text-sm hover:bg-red-700 transition-colors"
+          className="w-full bg-brand-gold text-black rounded-lg py-2.5 font-bold text-sm transition-opacity hover:opacity-90"
         >
           כניסה
         </button>
       </form>
-      <p className="text-center text-sm text-gray-500 mt-4">
+      <p className="text-center text-sm text-brand-muted mt-4">
         אין לך חשבון?{" "}
-        <Link href="/register" className="text-brand-red font-semibold">
+        <Link href="/register" className="text-brand-gold font-semibold">
           הרשמה
         </Link>
       </p>
