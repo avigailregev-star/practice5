@@ -17,9 +17,14 @@ FEATURE_COLS = [
 
 
 def rating_to_score(avg_rating) -> float:
-    """Convert avg self_rating (1–3) to 0–100 score (inverted). None → 50."""
+    """Convert avg self_rating (1–3) to 0–100 score (inverted: 1→75, 2→50, 3→25). None/NaN → 50."""
     if avg_rating is None:
         return 50.0
+    try:
+        if pd.isna(avg_rating):
+            return 50.0
+    except (TypeError, ValueError):
+        pass
     # rating 1 → 75, rating 2 → 50, rating 3 → 25
     return round((4.0 - float(avg_rating)) * 25.0, 1)
 
@@ -56,6 +61,8 @@ def run_predictions() -> dict:
         raise RuntimeError("SUPABASE_URL / SUPABASE_KEY not set in environment")
 
     supabase = create_client(url, key)
+    if not MODEL_PATH.exists():
+        raise FileNotFoundError(f"model.pkl not found at {MODEL_PATH}. Run full analysis first.")
     model = joblib.load(MODEL_PATH)
 
     # Fetch all student profiles

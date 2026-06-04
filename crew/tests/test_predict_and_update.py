@@ -29,3 +29,24 @@ def test_build_feature_row_basic():
     assert row["bow_control_score"] == 50.0
     assert row["avg_score"] == 50.0
     assert len(row) == 10  # all 10 features present
+
+def test_rating_to_score_none_avg():
+    """build_feature_row with None avg_rating should not crash."""
+    row = build_feature_row(
+        current_level=2,
+        sessions_this_week=0,
+        weekly_minutes=0.0,
+        avg_rating=None,
+    )
+    assert row["bow_control_score"] == 50.0
+    assert row["avg_score"] == 50.0
+
+def test_build_feature_row_keys():
+    """All 10 expected feature keys must be present."""
+    expected_keys = {
+        "years_experience", "weekly_practice_minutes", "bow_control_score",
+        "intonation_score", "rhythm_score", "sight_reading_score",
+        "scale_accuracy", "current_level", "sessions_this_week", "avg_score",
+    }
+    row = build_feature_row(current_level=1, sessions_this_week=2, weekly_minutes=30.0, avg_rating=1.5)
+    assert set(row.keys()) == expected_keys
