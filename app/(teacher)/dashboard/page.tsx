@@ -27,6 +27,33 @@ export default async function DashboardPage() {
 
   const studentList = students ?? [];
 
+  // Fetch recommended_level from ML predictions
+  const { data: profilesWithML } = await supabase
+    .from("profiles")
+    .select("id, recommended_level")
+    .eq("role", "student") as {
+      data: { id: string; recommended_level: number | null }[] | null;
+    };
+
+  const recommendedLevelMap = new Map<string, number | null>(
+    (profilesWithML ?? []).map(p => [p.id, p.recommended_level])
+  );
+
+  // Fetch last ML run for info banner
+  const { data: lastMLRun } = await supabase
+    .from("ml_runs")
+    .select("model_name, accuracy, predicted_at, students_updated")
+    .order("predicted_at", { ascending: false })
+    .limit(1)
+    .maybeSingle() as {
+      data: {
+        model_name: string;
+        accuracy: number;
+        predicted_at: string;
+        students_updated: number;
+      } | null;
+    };
+
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
@@ -198,6 +225,17 @@ export default async function DashboardPage() {
         </div>
       </div>
 
+      {/* ML Info Banner */}
+      {lastMLRun && (
+        <div className="mx-4 mt-3 bg-purple-50 border border-purple-200 rounded-xl px-4 py-2.5 flex flex-wrap gap-x-4 gap-y-1 text-xs text-purple-800">
+          <span className="font-semibold">🤖 מודל ML</span>
+          <span>{lastMLRun.model_name}</span>
+          <span>דיוק: {Math.round(lastMLRun.accuracy * 100)}%</span>
+          <span>עודכן: {new Date(lastMLRun.predicted_at).toLocaleDateString("he-IL")}</span>
+          <span>{lastMLRun.students_updated} תלמידים</span>
+        </div>
+      )}
+
       {/* Stats */}
       <div className="mt-4">
         <TeacherStats
@@ -230,6 +268,7 @@ export default async function DashboardPage() {
                 lastSession={lastSessionMap.get(student.id) ?? null}
                 avgRating={ratingMap.get(student.id)}
                 sessions={sessionHistoryMap.get(student.id) ?? []}
+                recommendedLevel={recommendedLevelMap.get(student.id) ?? null}
               />
             ))}
           </div>

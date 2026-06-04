@@ -48,6 +48,7 @@ interface StudentCardProps {
   lastSession: LastSession | null;
   avgRating?: number;
   sessions?: Session[];
+  recommendedLevel?: number | null;
 }
 
 export default function StudentCard({
@@ -58,6 +59,7 @@ export default function StudentCard({
   lastSession,
   avgRating,
   sessions = [],
+  recommendedLevel,
 }: StudentCardProps) {
   const [open, setOpen] = useState(false);
   const initial = name[0] ?? "?";
@@ -92,6 +94,17 @@ export default function StudentCard({
               {badge && (
                 <span className="text-xs bg-brand-bg border border-brand-border px-2 py-0.5 rounded-full">
                   {badge.emoji} {badge.label}
+                </span>
+              )}
+              {recommendedLevel != null && (
+                <span className={`text-xs font-semibold px-2 py-0.5 rounded-full border ${
+                  recommendedLevel > level
+                    ? "bg-green-50 text-green-700 border-green-300"
+                    : recommendedLevel < level
+                    ? "bg-orange-50 text-orange-700 border-orange-300"
+                    : "bg-gray-100 text-gray-500 border-gray-200"
+                }`}>
+                  {recommendedLevel > level ? "⬆️" : recommendedLevel < level ? "⬇️" : "🟰"} רמה מומלצת: {recommendedLevel}
                 </span>
               )}
             </div>
