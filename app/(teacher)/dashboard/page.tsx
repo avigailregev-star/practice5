@@ -4,6 +4,9 @@ import StudentCard from "@/components/teacher/StudentCard";
 import TeacherStats from "@/components/teacher/TeacherStats";
 import { logout } from "@/app/actions/auth";
 import { LogOut } from "lucide-react";
+import fs from "fs";
+import path from "path";
+import ViolinAnalysisSection from "@/components/teacher/ViolinAnalysisSection";
 
 export default async function DashboardPage() {
   const supabase = await createClient();
@@ -129,6 +132,20 @@ export default async function DashboardPage() {
 
   const practicedThisWeekIds = new Set(sessions.map((s) => s.student_id));
 
+  // Load crew analysis JSON if available
+  let crewAnalysis: {
+    generated_at: string;
+    avg_scores: Record<string, number>;
+    difficulty_distribution: Record<string, number>;
+  } | null = null;
+  try {
+    const jsonPath = path.join(process.cwd(), "public", "crew-analysis.json");
+    const raw = fs.readFileSync(jsonPath, "utf-8");
+    crewAnalysis = JSON.parse(raw);
+  } catch {
+    // File doesn't exist yet — section hidden
+  }
+
   return (
     <main className="max-w-lg mx-auto bg-brand-bg min-h-screen">
       {/* Header */}
@@ -159,6 +176,11 @@ export default async function DashboardPage() {
           practicedThisWeek={practicedThisWeekIds.size}
         />
       </div>
+
+      {/* Violin Analysis */}
+      {crewAnalysis && (
+        <ViolinAnalysisSection data={crewAnalysis} />
+      )}
 
       {/* Student list */}
       <div className="px-4">

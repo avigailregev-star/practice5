@@ -60,6 +60,29 @@ with tab1:
             acc = results[best]["accuracy"]
             st.success(f"✅ Crew 2 הסתיים — מודל: **{best}** | Accuracy: **{acc:.1%}**")
 
+        # Save results for Next.js dashboard
+        import json as _json
+        import datetime as _dt
+        import pathlib as _pl
+        import pandas as pd
+
+        _score_cols = ["bow_control_score", "intonation_score", "rhythm_score",
+                       "sight_reading_score", "scale_accuracy"]
+        _df = pd.read_csv("data/clean_data.csv")
+        _results = {
+            "generated_at": _dt.datetime.now().isoformat(),
+            "avg_scores": {col: float(_df[col].mean()) for col in _score_cols},
+            "difficulty_distribution": {
+                str(k): int(v)
+                for k, v in _df["recommended_difficulty"].value_counts().sort_index().items()
+            },
+        }
+        _out = _pl.Path(__file__).parent.parent / "public" / "crew-analysis.json"
+        _out.parent.mkdir(parents=True, exist_ok=True)
+        with open(_out, "w", encoding="utf-8") as _f:
+            _json.dump(_results, _f, indent=2, ensure_ascii=False)
+        st.success("✅ תוצאות נשמרו לדשבורד המורה")
+
         st.balloons()
 
     # Display outputs if they exist
