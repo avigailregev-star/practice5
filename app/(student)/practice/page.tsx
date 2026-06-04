@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import TimeSkillSelector from "@/components/student/TimeSkillSelector";
 import XPBar from "@/components/student/XPBar";
 import WeeklyProgress from "@/components/student/WeeklyProgress";
+import ViolinMascot from "@/components/shared/ViolinMascot";
 
 export default async function PracticePage() {
   const supabase = await createClient();
@@ -57,6 +58,14 @@ export default async function PracticePage() {
         <div className="mx-4 mt-4 rounded-2xl p-4 bg-brand-card border border-brand-border">
           <p className="text-xs font-semibold text-brand-muted tracking-widest mb-3">השבוע</p>
           <WeeklyProgress practicedDays={practicedDays} />
+        </div>
+
+        {/* Mascot */}
+        <div className="flex justify-center mt-5 mb-1">
+          <ViolinMascot
+            mood={practicedDays.length >= 5 ? "excited" : practicedDays.length >= 3 ? "happy" : "encouraging"}
+            size={110}
+          />
         </div>
 
         {/* Selector */}
