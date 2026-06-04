@@ -85,6 +85,19 @@ with tab1:
 
         st.balloons()
 
+        st.divider()
+        st.subheader("🤖 עדכון רמות מומלצות בדשבורד")
+        st.caption("מריץ את מודל ה-ML על נתוני התלמידים האמיתיים ומעדכן את דשבורד המורה")
+        if st.button("עדכן רמות מומלצות", key="predict_after_train"):
+            with st.spinner("מריץ ניבויים..."):
+                from predict_and_update import run_predictions
+                result = run_predictions()
+            st.success(
+                f"✅ עודכנו {result['students_updated']} תלמידים | "
+                f"מודל: {result['model']} | "
+                f"Accuracy: {result['accuracy']:.1%}"
+            )
+
     # Display outputs if they exist
     if Path("outputs/eda_report.html").exists():
         st.subheader("📊 דו\"ח ניתוח")
@@ -102,6 +115,23 @@ with tab1:
     if Path("outputs/evaluation_report.md").exists():
         with st.expander("📋 דו\"ח הערכה מלא"):
             st.markdown(Path("outputs/evaluation_report.md").read_text(encoding="utf-8"))
+
+    st.divider()
+    st.subheader("🤖 עדכון רמות מומלצות בדשבורד")
+    st.caption("ניתן לעדכן את הרמות המומלצות גם ללא הרצת ניתוח מחדש, אם המודל כבר קיים")
+    if st.button("עדכן רמות מומלצות", key="predict_standalone"):
+        model_path = Path("outputs/model.pkl")
+        if not model_path.exists():
+            st.error("⚠️ קובץ model.pkl לא נמצא. הפעילי ניתוח מלא קודם.")
+        else:
+            with st.spinner("מריץ ניבויים..."):
+                from predict_and_update import run_predictions
+                result = run_predictions()
+            st.success(
+                f"✅ עודכנו {result['students_updated']} תלמידים | "
+                f"מודל: {result['model']} | "
+                f"Accuracy: {result['accuracy']:.1%}"
+            )
 
 
 # ─── TAB 2: Student Simulation ───────────────────────────────────────────────
