@@ -120,7 +120,7 @@ with tab1:
     st.subheader("🤖 עדכון רמות מומלצות בדשבורד")
     st.caption("ניתן לעדכן את הרמות המומלצות גם ללא הרצת ניתוח מחדש, אם המודל כבר קיים")
     if st.button("עדכן רמות מומלצות", key="predict_standalone"):
-        model_path = Path("outputs/model.pkl")
+        model_path = Path(__file__).parent / "outputs" / "model.pkl"
         if not model_path.exists():
             st.error("⚠️ קובץ model.pkl לא נמצא. הפעילי ניתוח מלא קודם.")
         else:
@@ -155,7 +155,7 @@ with tab2:
         sessions = st.slider("סשנים השבוע", 0, 7, 3)
 
     if st.button("🎯 קבל המלצה", type="primary"):
-        model_path = Path("outputs/model.pkl")
+        model_path = Path(__file__).parent / "outputs" / "model.pkl"
         if not model_path.exists():
             st.error("⚠️ עדיין לא הורץ ניתוח. עברי לטאב המורה והפעילי 'ניתוח מלא' קודם.")
         else:
