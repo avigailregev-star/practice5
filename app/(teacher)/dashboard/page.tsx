@@ -71,6 +71,26 @@ export default async function DashboardPage() {
     sessionCountMap.set(s.student_id, (sessionCountMap.get(s.student_id) ?? 0) + 1);
   }
 
+  // Fetch all self_rating values
+  const { data: ratingRows } = await supabase
+    .from("practice_sessions")
+    .select("student_id, self_rating")
+    .not("self_rating", "is", null) as {
+      data: { student_id: string; self_rating: number }[] | null;
+    };
+
+  // Compute avg rating per student
+  const ratingMap = new Map<string, number>();
+  const ratingAccum = new Map<string, number[]>();
+  for (const r of ratingRows ?? []) {
+    const arr = ratingAccum.get(r.student_id) ?? [];
+    arr.push(r.self_rating);
+    ratingAccum.set(r.student_id, arr);
+  }
+  for (const [id, values] of ratingAccum) {
+    ratingMap.set(id, values.reduce((a, b) => a + b, 0) / values.length);
+  }
+
   const practicedTodayIds = new Set(
     sessions
       .filter((s) => new Date(s.completed_at) >= today)
@@ -128,6 +148,7 @@ export default async function DashboardPage() {
                 xp={student.xp}
                 sessionCount={sessionCountMap.get(student.id) ?? 0}
                 lastSession={lastSessionMap.get(student.id) ?? null}
+                avgRating={ratingMap.get(student.id)}
               />
             ))}
           </div>

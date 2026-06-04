@@ -15,6 +15,12 @@ function timeAgo(dateStr: string): string {
   return "עכשיו";
 }
 
+function ratingBadge(avg: number): { emoji: string; label: string } {
+  if (avg < 1.7) return { emoji: "😊", label: "קל בממוצע" };
+  if (avg <= 2.3) return { emoji: "😐", label: "בסדר בממוצע" };
+  return { emoji: "😓", label: "קשה בממוצע" };
+}
+
 interface LastSession {
   completed_at: string;
   duration_minutes: number;
@@ -27,6 +33,7 @@ interface StudentCardProps {
   xp: number;
   sessionCount: number;
   lastSession: LastSession | null;
+  avgRating?: number;
 }
 
 export default function StudentCard({
@@ -35,11 +42,14 @@ export default function StudentCard({
   xp,
   sessionCount,
   lastSession,
+  avgRating,
 }: StudentCardProps) {
   const initial = name[0] ?? "?";
   const practicedToday = lastSession
     ? new Date(lastSession.completed_at).toDateString() === new Date().toDateString()
     : false;
+
+  const badge = avgRating != null ? ratingBadge(avgRating) : null;
 
   return (
     <div className="bg-brand-card rounded-2xl p-4 border border-brand-border">
@@ -59,6 +69,11 @@ export default function StudentCard({
             {practicedToday && (
               <span className="text-xs bg-brand-teal/10 border border-brand-teal/20 text-brand-teal px-2 py-0.5 rounded-full">
                 תרגל היום
+              </span>
+            )}
+            {badge && (
+              <span className="text-xs bg-brand-bg border border-brand-border px-2 py-0.5 rounded-full">
+                {badge.emoji} {badge.label}
               </span>
             )}
           </div>
