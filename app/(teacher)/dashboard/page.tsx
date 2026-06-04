@@ -4,8 +4,6 @@ import StudentCard from "@/components/teacher/StudentCard";
 import TeacherStats from "@/components/teacher/TeacherStats";
 import { logout } from "@/app/actions/auth";
 import { LogOut } from "lucide-react";
-import fs from "fs";
-import path from "path";
 import ViolinAnalysisSection from "@/components/teacher/ViolinAnalysisSection";
 
 export default async function DashboardPage() {
@@ -132,19 +130,51 @@ export default async function DashboardPage() {
 
   const practicedThisWeekIds = new Set(sessions.map((s) => s.student_id));
 
-  // Load crew analysis JSON if available
-  let crewAnalysis: {
-    generated_at: string;
-    avg_scores: Record<string, number>;
-    difficulty_distribution: Record<string, number>;
-  } | null = null;
-  try {
-    const jsonPath = path.join(process.cwd(), "public", "crew-analysis.json");
-    const raw = fs.readFileSync(jsonPath, "utf-8");
-    crewAnalysis = JSON.parse(raw);
-  } catch {
-    // File doesn't exist yet — section hidden
+  // Live statistics from Supabase
+  const SKILL_LABELS: Record<string, string> = {
+    notes: "קריאת תווים",
+    rhythm: "מקצבים",
+    scales: "סולמות",
+  };
+
+  const { data: allSessionsForStats } = await supabase
+    .from("practice_sessions")
+    .select("skill_type, difficulty_level, self_rating")
+    .not("completed_at", "is", null) as {
+      data: { skill_type: string; difficulty_level: number; self_rating: number | null }[] | null;
+    };
+
+  const statsRows = allSessionsForStats ?? [];
+
+  // Skill stats: avg self_rating per skill (only rated sessions)
+  const skillAccum = new Map<string, number[]>();
+  for (const s of statsRows) {
+    if (s.self_rating != null) {
+      const arr = skillAccum.get(s.skill_type) ?? [];
+      arr.push(s.self_rating);
+      skillAccum.set(s.skill_type, arr);
+    }
   }
+  const skillStats = Array.from(skillAccum.entries()).map(([skill, ratings]) => ({
+    skill: SKILL_LABELS[skill] ?? skill,
+    avgRating: ratings.reduce((a, b) => a + b, 0) / ratings.length,
+    count: ratings.length,
+  }));
+
+  // Difficulty distribution
+  const diffAccum = new Map<number, number>();
+  for (const s of statsRows) {
+    diffAccum.set(s.difficulty_level, (diffAccum.get(s.difficulty_level) ?? 0) + 1);
+  }
+  const difficultyDistribution = Array.from(diffAccum.entries())
+    .sort(([a], [b]) => a - b)
+    .map(([level, count]) => ({ level, count }));
+
+  const violinData = {
+    skillStats,
+    difficultyDistribution,
+    totalSessions: statsRows.length,
+  };
 
   return (
     <main className="max-w-lg mx-auto bg-brand-bg min-h-screen">
@@ -178,9 +208,7 @@ export default async function DashboardPage() {
       </div>
 
       {/* Violin Analysis */}
-      {crewAnalysis && (
-        <ViolinAnalysisSection data={crewAnalysis} />
-      )}
+      <ViolinAnalysisSection data={violinData} />
 
       {/* Student list */}
       <div className="px-4">
