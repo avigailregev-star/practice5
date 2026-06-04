@@ -66,6 +66,36 @@ export default async function DashboardPage() {
     .select("student_id")
     .not("completed_at", "is", null) as { data: { student_id: string }[] | null };
 
+  const { data: allSessionsHistory } = await supabase
+    .from("practice_sessions")
+    .select("student_id, completed_at, duration_minutes, skill_type, self_rating")
+    .not("completed_at", "is", null)
+    .order("completed_at", { ascending: false })
+    .limit(200) as {
+      data: {
+        student_id: string;
+        completed_at: string;
+        duration_minutes: number;
+        skill_type: string;
+        self_rating: number | null;
+      }[] | null;
+    };
+
+  // Group sessions by student_id (max 10 per student)
+  const sessionHistoryMap = new Map<string, {
+    completed_at: string;
+    duration_minutes: number;
+    skill_type: string;
+    self_rating: number | null;
+  }[]>();
+  for (const s of allSessionsHistory ?? []) {
+    const arr = sessionHistoryMap.get(s.student_id) ?? [];
+    if (arr.length < 10) {
+      arr.push(s);
+      sessionHistoryMap.set(s.student_id, arr);
+    }
+  }
+
   const sessionCountMap = new Map<string, number>();
   for (const s of allSessions ?? []) {
     sessionCountMap.set(s.student_id, (sessionCountMap.get(s.student_id) ?? 0) + 1);
@@ -149,6 +179,7 @@ export default async function DashboardPage() {
                 sessionCount={sessionCountMap.get(student.id) ?? 0}
                 lastSession={lastSessionMap.get(student.id) ?? null}
                 avgRating={ratingMap.get(student.id)}
+                sessions={sessionHistoryMap.get(student.id) ?? []}
               />
             ))}
           </div>
