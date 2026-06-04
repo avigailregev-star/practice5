@@ -1,11 +1,12 @@
 import Link from "next/link";
+import SelfRatingWidget from "@/components/student/SelfRatingWidget";
 
 export default async function CompletePage({
   searchParams,
 }: {
-  searchParams: Promise<{ xp?: string; leveled?: string }>;
+  searchParams: Promise<{ xp?: string; leveled?: string; session_id?: string }>;
 }) {
-  const { xp, leveled } = await searchParams;
+  const { xp, leveled, session_id } = await searchParams;
   const xpEarned = Number(xp ?? 0);
   const leveledUpTo = Number(leveled ?? 0);
   const didLevelUp = leveledUpTo > 0;
@@ -36,12 +37,17 @@ export default async function CompletePage({
           <p className="text-sm text-brand-muted mt-1">ניקוד שהרווחת</p>
         </div>
 
-        <Link
-          href="/practice"
-          className="block w-full bg-brand-pink text-white rounded-xl py-3 font-bold text-lg"
-        >
-          לתרגול הבא
-        </Link>
+        {/* Self Rating */}
+        {session_id ? (
+          <SelfRatingWidget sessionId={session_id} />
+        ) : (
+          <Link
+            href="/practice"
+            className="block w-full bg-brand-pink text-white rounded-xl py-3 font-bold text-lg"
+          >
+            לתרגול הבא
+          </Link>
+        )}
       </div>
     </main>
   );

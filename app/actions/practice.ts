@@ -93,5 +93,5 @@ export async function completePracticeSession(sessionId: string) {
 
   await checkAndGrantAchievements(user.id, newLevel, leveledUp);
 
-  redirect(`/practice/complete?xp=${xpEarned}&leveled=${leveledUp ? newLevel : 0}`);
+  redirect(`/practice/complete?xp=${xpEarned}&leveled=${leveledUp ? newLevel : 0}&session_id=${sessionId}`);
 }
