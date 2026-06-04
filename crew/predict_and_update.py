@@ -77,7 +77,6 @@ def run_predictions() -> dict:
     sessions_resp = supabase.table("practice_sessions") \
         .select("student_id, duration_minutes, self_rating") \
         .gte("completed_at", week_ago) \
-        .not_("completed_at", "is", None) \
         .execute()
     sessions = sessions_resp.data or []
 
