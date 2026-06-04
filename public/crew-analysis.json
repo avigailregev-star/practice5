@@ -1,0 +1,17 @@
+{
+  "generated_at": "2026-06-04T13:19:49.758929",
+  "avg_scores": {
+    "bow_control_score": 46.4,
+    "intonation_score": 46.135,
+    "rhythm_score": 46.645,
+    "sight_reading_score": 47.955,
+    "scale_accuracy": 46.395
+  },
+  "difficulty_distribution": {
+    "1": 50,
+    "2": 30,
+    "3": 12,
+    "4": 53,
+    "5": 55
+  }
+}

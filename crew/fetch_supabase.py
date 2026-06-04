@@ -20,8 +20,10 @@ SCORE_COLS = [
 
 
 def fetch_from_supabase(output_path: str = "data/raw_data.csv") -> str:
-    url = os.environ["SUPABASE_URL"]
-    key = os.environ["SUPABASE_KEY"]
+    url = os.environ.get("SUPABASE_URL")
+    key = os.environ.get("SUPABASE_KEY")
+    if not url or not key:
+        return "שגיאה: מפתחות Supabase לא מוגדרים. אנא הגדירי SUPABASE_URL ו-SUPABASE_KEY בקובץ .env"
     client = create_client(url, key)
 
     response = client.table("practice_sessions").select("*").execute()

@@ -8,7 +8,13 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import pandas as pd
 import seaborn as sns
+from bidi.algorithm import get_display
 from crewai.tools import tool
+
+
+def _heb(text: str) -> str:
+    """Fix Hebrew text direction for matplotlib."""
+    return get_display(text)
 
 FEATURE_COLS = [
     "years_experience", "weekly_practice_minutes", "bow_control_score",
@@ -49,42 +55,46 @@ def run_eda(clean_path: str = "data/clean_data.csv",
     Path(output_dir).mkdir(parents=True, exist_ok=True)
     imgs = {}
 
-    # 1. Score histograms
-    fig, axes = plt.subplots(2, 3, figsize=(14, 8))
-    for ax, col in zip(axes.flat, SCORE_COLS):
-        ax.hist(df[col], bins=20, color="#ff6b9d", edgecolor="white")
-        ax.set_title(col.replace("_score", "").replace("_", " ").title())
-        ax.set_xlabel("Score")
-    axes.flat[-1].set_visible(False)
-    fig.suptitle("התפלגות ציונים", fontsize=14)
-    imgs["hist"] = _fig_to_b64(fig)
-    plt.close(fig)
+    SCORE_LABELS = {
+        "bow_control_score": _heb("שליטה בקשת"),
+        "intonation_score": _heb("דיוק גובה הצליל"),
+        "rhythm_score": _heb("מקצב"),
+        "sight_reading_score": _heb("קריאה מהדף"),
+        "scale_accuracy": _heb("דיוק בסולמות"),
+    }
+    COLORS = ["#ff6b9d", "#4ecdc4", "#a29bfe", "#ff9f43", "#55efc4"]
 
-    # 2. Correlation heatmap
-    fig, ax = plt.subplots(figsize=(10, 8))
-    corr = df[SCORE_COLS + [TARGET_COL]].corr()
-    sns.heatmap(corr, annot=True, fmt=".2f", cmap="RdYlGn", ax=ax)
-    ax.set_title("מתאמים בין משתנים")
-    imgs["corr"] = _fig_to_b64(fig)
-    plt.close(fig)
-
-    # 3. Avg scores by level
+    # 1. ממוצע ציון לכל מיומנות — עמודה אחת לכל מיומנות
+    avg = df[SCORE_COLS].mean()
+    labels = [SCORE_LABELS[c] for c in SCORE_COLS]
     fig, ax = plt.subplots(figsize=(9, 5))
-    df.groupby("current_level")[SCORE_COLS].mean().plot(kind="bar", ax=ax, colormap="Set2")
-    ax.set_title("ממוצע ציונים לפי רמה")
-    ax.set_xlabel("רמה נוכחית")
-    ax.legend(fontsize=7, loc="lower right")
-    imgs["by_level"] = _fig_to_b64(fig)
+    bars = ax.bar(labels, avg.values, color=COLORS, edgecolor="white", width=0.6)
+    ax.set_ylim(0, 100)
+    ax.set_ylabel(_heb("ציון ממוצע"))
+    ax.set_title(_heb("ממוצע ציון לכל מיומנות"), fontsize=14, fontweight="bold")
+    for bar, val in zip(bars, avg.values):
+        ax.text(bar.get_x() + bar.get_width() / 2, bar.get_height() + 1.5,
+                f"{val:.0f}", ha="center", va="bottom", fontsize=11, fontweight="bold")
+    ax.axhline(y=avg.values.mean(), color="gray", linestyle="--", linewidth=1.2, label=_heb("ממוצע כללי"))
+    ax.legend()
+    fig.tight_layout()
+    imgs["avg_skills"] = _fig_to_b64(fig)
     plt.close(fig)
 
-    # 4. Scatter: practice vs intonation
+    # 2. התפלגות רמות קושי מומלצות — כמה תלמידים בכל רמה
+    level_counts = df[TARGET_COL].value_counts().sort_index()
+    level_colors = ["#55efc4", "#74b9ff", "#fdcb6e", "#e17055", "#d63031"]
     fig, ax = plt.subplots(figsize=(7, 5))
-    ax.scatter(df["weekly_practice_minutes"], df["intonation_score"],
-               alpha=0.5, color="#4ecdc4")
-    ax.set_xlabel("דקות תרגול שבועיות")
-    ax.set_ylabel("דיוק גובה הצליל")
-    ax.set_title("תרגול מול דיוק גובה הצליל")
-    imgs["scatter"] = _fig_to_b64(fig)
+    bars = ax.bar([f"{_heb('רמה')} {i}" for i in level_counts.index],
+                  level_counts.values, color=level_colors[:len(level_counts)],
+                  edgecolor="white", width=0.6)
+    ax.set_ylabel(_heb("מספר תלמידים"))
+    ax.set_title(_heb("כמה תלמידים בכל רמת קושי מומלצת"), fontsize=14, fontweight="bold")
+    for bar, val in zip(bars, level_counts.values):
+        ax.text(bar.get_x() + bar.get_width() / 2, bar.get_height() + 0.5,
+                str(val), ha="center", va="bottom", fontsize=12, fontweight="bold")
+    fig.tight_layout()
+    imgs["difficulty_dist"] = _fig_to_b64(fig)
     plt.close(fig)
 
     html = f"""<!DOCTYPE html>
@@ -100,14 +110,10 @@ def run_eda(clean_path: str = "data/clean_data.csv",
 </head>
 <body>
 <h1>🎻 דו"ח ניתוח נתוני תרגול כינור</h1>
-<h2>התפלגות ציונים</h2>
-<img src="data:image/png;base64,{imgs['hist']}">
-<h2>מתאמים בין משתנים</h2>
-<img src="data:image/png;base64,{imgs['corr']}">
-<h2>ממוצע ציונים לפי רמה</h2>
-<img src="data:image/png;base64,{imgs['by_level']}">
-<h2>דקות תרגול מול דיוק גובה הצליל</h2>
-<img src="data:image/png;base64,{imgs['scatter']}">
+<h2>ממוצע ציון לכל מיומנות</h2>
+<img src="data:image/png;base64,{imgs['avg_skills']}">
+<h2>התפלגות רמות קושי מומלצות</h2>
+<img src="data:image/png;base64,{imgs['difficulty_dist']}">
 </body>
 </html>"""
 
