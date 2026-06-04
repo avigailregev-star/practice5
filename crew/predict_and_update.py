@@ -117,11 +117,14 @@ def run_predictions() -> dict:
             .execute()
         updated += 1
 
-    # Log the run
-    supabase.table("ml_runs").insert({
-        "model_name": MODEL_NAME,
-        "accuracy": MODEL_ACCURACY,
-        "students_updated": updated,
-    }).execute()
+    # Log the run (best-effort — ignore RLS/permission errors)
+    try:
+        supabase.table("ml_runs").insert({
+            "model_name": MODEL_NAME,
+            "accuracy": MODEL_ACCURACY,
+            "students_updated": updated,
+        }).execute()
+    except Exception:
+        pass
 
     return {"students_updated": updated, "model": MODEL_NAME, "accuracy": MODEL_ACCURACY}
