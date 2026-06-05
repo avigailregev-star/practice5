@@ -162,7 +162,8 @@ export default function NoteAssessment({ studentId, initialLevel }: Props) {
     setSaving(true);
     const score = Math.round((totalCorrect / totalAnswered) * 100);
     const supabase = createClient();
-    const { error } = await supabase.from("assessments").insert({
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { error } = await (supabase as any).from("assessments").insert({
       student_id: studentId,
       type: "notes",
       score,
