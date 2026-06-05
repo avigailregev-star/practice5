@@ -15,6 +15,16 @@ import {
 
 type AnimState = "idle" | "correct" | "wrong" | "levelup" | "leveldown";
 
+function clampLevel(l: number): DifficultyLevel {
+  return Math.max(1, Math.min(3, l)) as DifficultyLevel;
+}
+
+const LEVEL_LABELS: Record<DifficultyLevel, string> = {
+  1: "קל",
+  2: "בינוני",
+  3: "קשה",
+};
+
 interface Props {
   studentId: string;
   initialLevel: DifficultyLevel;
@@ -63,21 +73,17 @@ function Sparkles() {
 }
 
 export default function NoteAssessment({ studentId, initialLevel }: Props) {
-  const clampLevel = (l: number): DifficultyLevel =>
-    (Math.max(1, Math.min(3, l)) as DifficultyLevel);
+  const startLevel = clampLevel(initialLevel);
+  const firstNote = pickRandomNote(startLevel);
 
-  const [level, setLevel] = useState<DifficultyLevel>(clampLevel(initialLevel));
-  const [currentNote, setCurrentNote] = useState<NoteData>(() =>
-    pickRandomNote(clampLevel(initialLevel))
-  );
-  const [choices, setChoices] = useState<NoteName[]>(() =>
-    generateChoices(pickRandomNote(clampLevel(initialLevel)))
-  );
+  const [level, setLevel] = useState<DifficultyLevel>(startLevel);
+  const [currentNote, setCurrentNote] = useState<NoteData>(firstNote);
+  const [choices, setChoices] = useState<NoteName[]>(() => generateChoices(firstNote));
   const [correctStreak, setCorrectStreak] = useState(0);
   const [wrongStreak, setWrongStreak] = useState(0);
   const [totalCorrect, setTotalCorrect] = useState(0);
   const [totalAnswered, setTotalAnswered] = useState(0);
-  const [maxLevel, setMaxLevel] = useState<DifficultyLevel>(clampLevel(initialLevel));
+  const [maxLevel, setMaxLevel] = useState<DifficultyLevel>(startLevel);
   const [animState, setAnimState] = useState<AnimState>("idle");
   const [isDone, setIsDone] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -156,7 +162,7 @@ export default function NoteAssessment({ studentId, initialLevel }: Props) {
     setSaving(true);
     const score = Math.round((totalCorrect / totalAnswered) * 100);
     const supabase = createClient();
-    await supabase.from("assessments").insert({
+    const { error } = await supabase.from("assessments").insert({
       student_id: studentId,
       type: "notes",
       score,
@@ -165,6 +171,10 @@ export default function NoteAssessment({ studentId, initialLevel }: Props) {
       total_answered: totalAnswered,
     });
     setSaving(false);
+    if (error) {
+      console.error("Failed to save assessment:", error);
+      // Still mark as done so user isn't stuck
+    }
     setIsDone(true);
   }, [studentId, totalAnswered, totalCorrect, maxLevel]);
 
@@ -208,12 +218,6 @@ export default function NoteAssessment({ studentId, initialLevel }: Props) {
     : animState === "wrong" ? "כמעט... נסה שוב!"
     : undefined;
 
-  const levelLabels: Record<DifficultyLevel, string> = {
-    1: "קל",
-    2: "בינוני",
-    3: "קשה",
-  };
-
   return (
     <div
       className={`flex flex-col gap-4 px-4 py-4 relative ${
@@ -227,14 +231,14 @@ export default function NoteAssessment({ studentId, initialLevel }: Props) {
       <div className="flex items-center justify-between">
         <button
           onClick={handleFinish}
-          disabled={saving}
+          disabled={saving || animState !== "idle"}
           className="text-sm text-brand-muted border border-brand-border rounded-xl px-3 py-1.5"
         >
           {saving ? "שומר..." : "סיום מבחן"}
         </button>
         <div className="text-center">
           <p className="text-xs text-brand-muted">רמה</p>
-          <p className="font-bold text-brand-text">{levelLabels[level]}</p>
+          <p className="font-bold text-brand-text">{LEVEL_LABELS[level]}</p>
         </div>
         <div className="text-center">
           <p className="text-xs text-brand-muted">ניקוד</p>
@@ -269,7 +273,7 @@ export default function NoteAssessment({ studentId, initialLevel }: Props) {
       <div className="grid grid-cols-2 gap-3">
         {choices.map((name) => {
           const isCorrect = name === currentNote.name;
-          const showResult = animState === "correct" || animState === "wrong";
+          const showResult = animState === "correct" || animState === "wrong" || animState === "levelup" || animState === "leveldown";
           return (
             <button
               key={name}
