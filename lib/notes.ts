@@ -24,23 +24,32 @@ export function getNotesForLevel(level: DifficultyLevel): NoteData[] {
   return ALL_NOTES.filter((n) => n.level <= level);
 }
 
+function fisherYates<T>(arr: T[]): T[] {
+  const copy = [...arr];
+  for (let i = copy.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [copy[i], copy[j]] = [copy[j], copy[i]];
+  }
+  return copy;
+}
+
 /** Pick a random note from available notes, different from the previous */
 export function pickRandomNote(
   level: DifficultyLevel,
   previousAbcSymbol?: string
 ): NoteData {
-  const pool = getNotesForLevel(level).filter(
-    (n) => n.abcSymbol !== previousAbcSymbol
-  );
-  return pool[Math.floor(Math.random() * pool.length)];
+  const all = getNotesForLevel(level);
+  const pool = all.filter((n) => n.abcSymbol !== previousAbcSymbol);
+  // Fallback: if previous was the only note, allow repeating it
+  const candidates = pool.length > 0 ? pool : all;
+  return candidates[Math.floor(Math.random() * candidates.length)];
 }
 
 /** Generate 4 answer choices: correct + 3 random wrong ones */
 export function generateChoices(correct: NoteData): NoteName[] {
   const wrong = ALL_NOTES.filter((n) => n.abcSymbol !== correct.abcSymbol);
-  const shuffledWrong = wrong.sort(() => Math.random() - 0.5).slice(0, 3);
-  const all = [correct, ...shuffledWrong].sort(() => Math.random() - 0.5);
-  return all.map((n) => n.name);
+  const shuffledWrong = fisherYates(wrong).slice(0, 3);
+  return fisherYates([correct, ...shuffledWrong]).map((n) => n.name);
 }
 
 /** Map score percentage to encouraging label */
