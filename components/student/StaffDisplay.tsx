@@ -12,9 +12,10 @@ export default function StaffDisplay({ abcSymbol, animClass = "" }: StaffDisplay
 
   useEffect(() => {
     if (!divRef.current) return;
-    // Single note in treble clef, middle octave
-    const abcString = `X:1\nT:\nM:4/4\nL:1/1\nK:C treble\n|${abcSymbol}4|`;
+    // Single note in treble clef, middle octave (L:1/4 so C4 = whole note = fills 4/4 bar)
+    const abcString = `X:1\nT:\nM:4/4\nL:1/4\nK:C treble\n|${abcSymbol}4|`;
 
+    // @ts-ignore
     import("abcjs").then((abcjs) => {
       abcjs.renderAbc(divRef.current!, abcString, {
         responsive: "resize",
