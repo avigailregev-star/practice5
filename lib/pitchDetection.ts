@@ -71,10 +71,10 @@ export function pickPitchNote(level: DifficultyLevel, previousNoteName?: string)
 }
 
 // ── Pitch detection constants ─────────────────────────────────────────────────
-const SILENCE_THRESHOLD = 0.01;     // RMS below this = silence
+const SILENCE_THRESHOLD = 0.005;    // RMS below this = silence
 const MIN_FREQ_HZ = 60;             // lower bound: ~B1
 const MAX_FREQ_HZ = 1200;           // upper bound: ~D6
-const CLARITY_THRESHOLD = 0.9;      // minimum normalized autocorrelation to accept pitch
+const CLARITY_THRESHOLD = 0.75;     // minimum normalized autocorrelation to accept pitch (0.75 works for violin/voice)
 
 // ── Pitch detection ───────────────────────────────────────────────────────────
 

@@ -87,7 +87,7 @@ export default function PitchAssessment({ studentId, initialLevel }: Props) {
     setNoSoundHint(false);
     noSoundTimerRef.current = setTimeout(() => {
       if (phaseRef.current === "listening") setNoSoundHint(true);
-    }, 5000);
+    }, 8000);
   }, []);
 
   // ── Advance to next note ──────────────────────────────────────────────────
@@ -154,7 +154,7 @@ export default function PitchAssessment({ studentId, initialLevel }: Props) {
     // Advance after 1.5 s feedback
     feedbackTimerRef.current = setTimeout(() => {
       if (!isDoneRef.current) advanceToNextNote(newLevel, prevNoteName);
-    }, 1500);
+    }, 2000);
   };
 
   // ── Mic setup + detection loop ────────────────────────────────────────────
@@ -199,14 +199,14 @@ export default function PitchAssessment({ studentId, initialLevel }: Props) {
               if (stableStartRef.current === null) {
                 stableStartRef.current = Date.now();
               }
-              if (Date.now() - stableStartRef.current >= 2000) {
+              if (Date.now() - stableStartRef.current >= 1500) {
                 handleResultRef.current?.(true);
               }
             } else {
               // Wrong note or silence — reset stable timer
               stableStartRef.current = null;
-              // Timeout: 6s without correct pitch = wrong
-              if (Date.now() - roundStartRef.current > 6000) {
+              // Timeout: 15s without correct pitch = wrong
+              if (Date.now() - roundStartRef.current > 15000) {
                 handleResultRef.current?.(false);
               }
             }
