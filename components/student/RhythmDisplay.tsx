@@ -23,6 +23,12 @@ export default function RhythmDisplay({ pattern, level, onComplete }: Props) {
   const soundedRef = useRef<Set<number>>(new Set());
   const tapTimesRef = useRef<number[]>([]);
   const doneRef = useRef(false);
+  const onCompleteRef = useRef(onComplete);
+
+  // Keep onCompleteRef current so animation loop always calls the latest version
+  useEffect(() => {
+    onCompleteRef.current = onComplete;
+  }, [onComplete]);
 
   const playClick = useCallback(() => {
     try {
@@ -41,8 +47,9 @@ export default function RhythmDisplay({ pattern, level, onComplete }: Props) {
   }, []);
 
   const handleTap = useCallback(() => {
-    if (!audioCtxRef.current) audioCtxRef.current = new AudioContext();
+    // Guard before creating AudioContext
     if (doneRef.current) return;
+    if (!audioCtxRef.current) audioCtxRef.current = new AudioContext();
     const elapsed = Date.now() - startTimeRef.current;
     if (elapsed >= 0) tapTimesRef.current.push(elapsed);
   }, []);
@@ -59,7 +66,7 @@ export default function RhythmDisplay({ pattern, level, onComplete }: Props) {
       // Move ball
       if (ballRef.current && trackRef.current) {
         const progress = Math.min(elapsed / totalMs, 1);
-        const trackWidth = trackRef.current.offsetWidth - 20; // 20 = ball diameter
+        const trackWidth = trackRef.current.offsetWidth - 20; // 20 = ball diameter (w-5)
         ballRef.current.style.transform = `translateX(${progress * trackWidth}px)`;
       }
 
@@ -81,7 +88,7 @@ export default function RhythmDisplay({ pattern, level, onComplete }: Props) {
           const expected = beatTimestamps[i];
           return tapTimesRef.current.some((t) => Math.abs(t - expected) <= 200);
         });
-        onComplete(hits);
+        onCompleteRef.current(hits);
       }
     };
 
@@ -89,6 +96,9 @@ export default function RhythmDisplay({ pattern, level, onComplete }: Props) {
     return () => {
       cancelAnimationFrame(rafRef.current);
       doneRef.current = true;
+      // Close AudioContext to avoid resource leak on remount
+      audioCtxRef.current?.close().catch(() => {});
+      audioCtxRef.current = null;
     };
   }, [pattern, level]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -141,6 +151,7 @@ export default function RhythmDisplay({ pattern, level, onComplete }: Props) {
       <div className="flex justify-center">
         <button
           onPointerDown={handleTap}
+          aria-label="הקש"
           className="w-28 h-28 rounded-full flex items-center justify-center active:scale-90 transition-transform select-none"
           style={{
             background: "linear-gradient(135deg, #0d9488, #0891b2)",
