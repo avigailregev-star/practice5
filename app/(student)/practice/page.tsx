@@ -71,6 +71,17 @@ export default async function PracticePage() {
           </a>
         </div>
 
+        {/* Rhythm assessment button */}
+        <div className="mx-4 mt-2">
+          <a
+            href="/practice/rhythm"
+            className="flex items-center justify-between w-full bg-white border border-brand-border rounded-2xl px-4 py-3 shadow-sm active:scale-95 transition-transform"
+          >
+            <span className="text-brand-muted text-sm">בדוק את חוש המקצב שלך</span>
+            <span className="text-xl">🥁</span>
+          </a>
+        </div>
+
         {/* Mascot */}
         <div className="flex justify-center mt-5 mb-1">
           <ViolinMascot
