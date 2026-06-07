@@ -60,6 +60,7 @@ export default function PitchAssessment({ studentId, initialLevel }: Props) {
   const levelRef = useRef<DifficultyLevel>(startLevel);
   const correctStreakRef = useRef(0);
   const wrongStreakRef = useRef(0);
+  const totalAnsweredRef = useRef(0);
   const stableStartRef = useRef<number | null>(null);
   const roundStartRef = useRef<number>(Date.now());
   const streamRef = useRef<MediaStream | null>(null);
@@ -113,7 +114,8 @@ export default function PitchAssessment({ studentId, initialLevel }: Props) {
     if (phaseRef.current !== "listening" || isDoneRef.current) return;
 
     const prevNoteName = currentNoteRef.current.noteName;
-    setTotalAnswered((t) => t + 1);
+    totalAnsweredRef.current += 1;
+    setTotalAnswered(totalAnsweredRef.current);
     if (isCorrect) setTotalCorrect((c) => c + 1);
     setLastResult(isCorrect ? "correct" : "wrong");
     setPhase("feedback");
@@ -151,9 +153,15 @@ export default function PitchAssessment({ studentId, initialLevel }: Props) {
     if (noSoundTimerRef.current) clearTimeout(noSoundTimerRef.current);
     setNoSoundHint(false);
 
-    // Advance after 1.5 s feedback
+    // After feedback: advance to next note, or finish if reached 6 questions
     feedbackTimerRef.current = setTimeout(() => {
-      if (!isDoneRef.current) advanceToNextNote(newLevel, prevNoteName);
+      if (!isDoneRef.current) {
+        if (totalAnsweredRef.current >= 6) {
+          handleFinish();
+        } else {
+          advanceToNextNote(newLevel, prevNoteName);
+        }
+      }
     }, 2000);
   };
 
