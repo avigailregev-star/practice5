@@ -114,7 +114,7 @@ export default function RhythmDisplay({ pattern, level, onComplete, preview }: P
       audioCtxRef.current = null;
       if (tappedTimerRef.current) clearTimeout(tappedTimerRef.current);
     };
-  }, [pattern, level]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [pattern, level, preview]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <div className="flex flex-col gap-5">
