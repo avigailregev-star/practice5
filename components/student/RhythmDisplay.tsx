@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useCallback } from "react";
+import { useEffect, useRef, useCallback, useState } from "react";
 import { RhythmPattern, DifficultyLevel, BPM, getBeatTimestamps } from "@/lib/rhythms";
 
 interface Props {
@@ -15,7 +15,7 @@ export default function RhythmDisplay({ pattern, level, onComplete }: Props) {
   const totalMs = pattern.totalDuration * msPerQuarter;
   const beatTimestamps = getBeatTimestamps(pattern, bpm);
 
-  const trackRef = useRef<HTMLDivElement>(null);
+  const ballTrackRef = useRef<HTMLDivElement>(null);
   const ballRef = useRef<HTMLDivElement>(null);
   const startTimeRef = useRef<number>(0);
   const rafRef = useRef<number>(0);
@@ -24,8 +24,11 @@ export default function RhythmDisplay({ pattern, level, onComplete }: Props) {
   const tapTimesRef = useRef<number[]>([]);
   const doneRef = useRef(false);
   const onCompleteRef = useRef(onComplete);
+  const [tapped, setTapped] = useState(false);
+  const [activeNote, setActiveNote] = useState<number | null>(null);
+  const tappedTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Keep onCompleteRef current so animation loop always calls the latest version
+  // Keep onCompleteRef current
   useEffect(() => {
     onCompleteRef.current = onComplete;
   }, [onComplete]);
@@ -47,11 +50,15 @@ export default function RhythmDisplay({ pattern, level, onComplete }: Props) {
   }, []);
 
   const handleTap = useCallback(() => {
-    // Guard before creating AudioContext
     if (doneRef.current) return;
     if (!audioCtxRef.current) audioCtxRef.current = new AudioContext();
     const elapsed = Date.now() - startTimeRef.current;
     if (elapsed >= 0) tapTimesRef.current.push(elapsed);
+
+    // Visual feedback — flash the drum button
+    setTapped(true);
+    if (tappedTimerRef.current) clearTimeout(tappedTimerRef.current);
+    tappedTimerRef.current = setTimeout(() => setTapped(false), 150);
   }, []);
 
   useEffect(() => {
@@ -63,18 +70,23 @@ export default function RhythmDisplay({ pattern, level, onComplete }: Props) {
     const animate = () => {
       const elapsed = Date.now() - startTimeRef.current;
 
-      // Move ball
-      if (ballRef.current && trackRef.current) {
+      // Move ball — center of ball tracks progress% of the track width
+      if (ballRef.current && ballTrackRef.current) {
         const progress = Math.min(elapsed / totalMs, 1);
-        const trackWidth = trackRef.current.offsetWidth - 20; // 20 = ball diameter (w-5)
-        ballRef.current.style.transform = `translateX(${progress * trackWidth}px)`;
+        const containerWidth = ballTrackRef.current.offsetWidth;
+        // Set left so ball CENTER is at progress * containerWidth
+        ballRef.current.style.left = `${progress * containerWidth - 10}px`;
       }
 
-      // Play clicks at each tappable beat
+      // Play clicks and highlight active note at each tappable beat
       beatTimestamps.forEach((t, i) => {
-        if (!soundedRef.current.has(i) && elapsed >= t && pattern.beats[i].tappable) {
+        if (!soundedRef.current.has(i) && elapsed >= t - 20) {
           soundedRef.current.add(i);
-          playClick();
+          if (pattern.beats[i].tappable) {
+            playClick();
+          }
+          setActiveNote(i);
+          setTimeout(() => setActiveNote((cur) => (cur === i ? null : cur)), 300);
         }
       });
 
@@ -82,11 +94,11 @@ export default function RhythmDisplay({ pattern, level, onComplete }: Props) {
         rafRef.current = requestAnimationFrame(animate);
       } else if (!doneRef.current) {
         doneRef.current = true;
-        // Evaluate: each tappable beat is a "hit" if any tap fell within ±200ms
         const hits = pattern.beats.map((beat, i) => {
-          if (!beat.tappable) return true; // rests auto-pass
+          if (!beat.tappable) return true;
           const expected = beatTimestamps[i];
-          return tapTimesRef.current.some((t) => Math.abs(t - expected) <= 200);
+          // ±350ms window — more forgiving
+          return tapTimesRef.current.some((t) => Math.abs(t - expected) <= 350);
         });
         onCompleteRef.current(hits);
       }
@@ -96,9 +108,9 @@ export default function RhythmDisplay({ pattern, level, onComplete }: Props) {
     return () => {
       cancelAnimationFrame(rafRef.current);
       doneRef.current = true;
-      // Close AudioContext to avoid resource leak on remount
       audioCtxRef.current?.close().catch(() => {});
       audioCtxRef.current = null;
+      if (tappedTimerRef.current) clearTimeout(tappedTimerRef.current);
     };
   }, [pattern, level]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -106,21 +118,30 @@ export default function RhythmDisplay({ pattern, level, onComplete }: Props) {
     <div className="flex flex-col gap-5">
       {/* Beat track */}
       <div className="bg-white rounded-2xl border-2 border-brand-border p-5 shadow-sm" dir="ltr">
-        {/* Note symbols */}
-        <div ref={trackRef} className="relative mb-4" style={{ height: "52px" }}>
+        {/* Note symbols — each centered at its leftPct% position */}
+        <div className="relative mb-4" style={{ height: "52px" }}>
           {pattern.beats.map((beat, i) => {
             const leftPct = (beatTimestamps[i] / totalMs) * 100;
-            const widthPct = (beat.duration * msPerQuarter / totalMs) * 100;
             const size = beat.duration <= 0.5 ? 32 : beat.duration >= 2 ? 52 : 40;
+            const isActive = activeNote === i;
             return (
               <div
                 key={i}
                 className="absolute top-0 flex items-center justify-center"
-                style={{ left: `${leftPct}%`, width: `${widthPct}%`, height: "52px" }}
+                style={{
+                  left: `${leftPct}%`,
+                  transform: "translateX(-50%)",
+                  width: `${size}px`,
+                  height: "52px",
+                }}
               >
                 <div
-                  className={`flex items-center justify-center rounded-lg text-xl border-2 font-bold select-none ${
-                    beat.tappable
+                  className={`flex items-center justify-center rounded-lg text-xl border-2 font-bold select-none transition-all duration-100 ${
+                    isActive
+                      ? beat.tappable
+                        ? "bg-yellow-200 border-yellow-400 text-yellow-800 scale-125"
+                        : "bg-orange-100 border-orange-300 text-orange-600 scale-110"
+                      : beat.tappable
                       ? "bg-blue-50 border-blue-200 text-blue-700"
                       : "bg-red-50 border-dashed border-red-200 text-red-400"
                   }`}
@@ -134,12 +155,12 @@ export default function RhythmDisplay({ pattern, level, onComplete }: Props) {
         </div>
 
         {/* Ball track */}
-        <div className="relative h-5 bg-gray-100 rounded-full">
+        <div ref={ballTrackRef} className="relative h-5 bg-gray-100 rounded-full overflow-hidden">
           <div
             ref={ballRef}
             className="absolute top-1/2 -translate-y-1/2 w-5 h-5 rounded-full"
             style={{
-              left: 0,
+              left: "-10px",
               background: "#22c55e",
               boxShadow: "0 0 10px rgba(34,197,94,0.7)",
             }}
@@ -152,10 +173,16 @@ export default function RhythmDisplay({ pattern, level, onComplete }: Props) {
         <button
           onPointerDown={handleTap}
           aria-label="הקש"
-          className="w-28 h-28 rounded-full flex items-center justify-center active:scale-90 transition-transform select-none"
+          className={`w-28 h-28 rounded-full flex items-center justify-center transition-all duration-75 select-none ${
+            tapped ? "scale-90" : "scale-100"
+          }`}
           style={{
-            background: "linear-gradient(135deg, #0d9488, #0891b2)",
-            boxShadow: "0 6px 20px rgba(13,148,136,0.4)",
+            background: tapped
+              ? "linear-gradient(135deg, #14b8a6, #06b6d4)"
+              : "linear-gradient(135deg, #0d9488, #0891b2)",
+            boxShadow: tapped
+              ? "0 2px 8px rgba(13,148,136,0.3), 0 0 0 6px rgba(255,255,255,0.4)"
+              : "0 6px 20px rgba(13,148,136,0.4)",
           }}
         >
           <svg width="65" height="65" viewBox="0 0 60 60" fill="none">
