@@ -21,11 +21,48 @@ export default async function DashboardPage() {
 
   const { data: students } = await supabase
     .from("profiles")
-    .select("id, name, level, xp")
+    .select("id, name, level, xp, weekly_summary, summary_updated_at")
     .eq("role", "student")
-    .order("name") as { data: { id: string; name: string; level: number; xp: number }[] | null };
+    .order("name") as {
+      data: {
+        id: string;
+        name: string;
+        level: number;
+        xp: number;
+        weekly_summary: string | null;
+        summary_updated_at: string | null;
+      }[] | null;
+    };
 
   const studentList = students ?? [];
+
+  // Fetch all assessments to compute per-domain averages per student
+  const { data: allAssessments } = await supabase
+    .from("assessments")
+    .select("student_id, type, score") as {
+      data: { student_id: string; type: string; score: number }[] | null;
+    };
+
+  // Build domainScoresMap: studentId → { notes, rhythm, pitch } avg %
+  const domainAccum = new Map<string, Record<string, number[]>>();
+  for (const a of allAssessments ?? []) {
+    if (!domainAccum.has(a.student_id)) {
+      domainAccum.set(a.student_id, { notes: [], rhythm: [], pitch: [] });
+    }
+    const entry = domainAccum.get(a.student_id)!;
+    if (entry[a.type]) entry[a.type].push(a.score);
+  }
+
+  const domainScoresMap = new Map<string, { notes: number | null; rhythm: number | null; pitch: number | null }>();
+  for (const [studentId, accum] of domainAccum) {
+    const avg = (arr: number[]) =>
+      arr.length > 0 ? Math.round(arr.reduce((a, b) => a + b, 0) / arr.length) : null;
+    domainScoresMap.set(studentId, {
+      notes: avg(accum.notes),
+      rhythm: avg(accum.rhythm),
+      pitch: avg(accum.pitch),
+    });
+  }
 
   // Fetch recommended_level from ML predictions
   const { data: profilesWithML } = await supabase
@@ -261,6 +298,7 @@ export default async function DashboardPage() {
             {studentList.map((student) => (
               <StudentCard
                 key={student.id}
+                studentId={student.id}
                 name={student.name}
                 level={student.level}
                 xp={student.xp}
@@ -269,6 +307,9 @@ export default async function DashboardPage() {
                 avgRating={ratingMap.get(student.id)}
                 sessions={sessionHistoryMap.get(student.id) ?? []}
                 recommendedLevel={recommendedLevelMap.get(student.id) ?? null}
+                domainScores={domainScoresMap.get(student.id) ?? null}
+                weeklySummary={student.weekly_summary}
+                summaryUpdatedAt={student.summary_updated_at}
               />
             ))}
           </div>
