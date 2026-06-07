@@ -146,6 +146,12 @@ export default function RhythmAssessment({ studentId, initialLevel }: Props) {
       total_answered: totalTappable,
     });
     if (error) console.error("Failed to save rhythm assessment:", error);
+    const domainLevel = score >= 80 ? 3 : score >= 50 ? 2 : 1;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    await (supabase as any)
+      .from("profiles")
+      .update({ level_rhythm: domainLevel })
+      .eq("id", studentId);
     setSaving(false);
     setIsDone(true);
   }, [studentId, totalHits, totalTappable, maxLevel, clearAllTimers]);
