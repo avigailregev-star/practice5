@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import { createClient } from "@/lib/supabase/client";
 import ViolinMascot from "@/components/shared/ViolinMascot";
 import RhythmDisplay from "./RhythmDisplay";
@@ -44,13 +44,31 @@ export default function RhythmAssessment({ studentId, initialLevel }: Props) {
   const [isDone, setIsDone] = useState(false);
   const [saving, setSaving] = useState(false);
 
+  // Track all pending timers so we can clear them on unmount or on re-sequence
+  const timersRef = useRef<ReturnType<typeof setTimeout>[]>([]);
+  const isDoneRef = useRef(false);
+
+  const clearAllTimers = useCallback(() => {
+    timersRef.current.forEach(clearTimeout);
+    timersRef.current = [];
+  }, []);
+
+  // Cleanup all timers on unmount
+  useEffect(() => {
+    return () => {
+      clearAllTimers();
+    };
+  }, [clearAllTimers]);
+
   const runCountdown = useCallback(() => {
+    // Cancel any pending timers before starting a new sequence
+    clearAllTimers();
     setPhase("countdown");
     setCountdown(3);
-    setTimeout(() => setCountdown(2), 1000);
-    setTimeout(() => setCountdown(1), 2000);
-    setTimeout(() => setPhase("playing"), 3000);
-  }, []);
+    timersRef.current.push(setTimeout(() => { if (!isDoneRef.current) setCountdown(2); }, 1000));
+    timersRef.current.push(setTimeout(() => { if (!isDoneRef.current) setCountdown(1); }, 2000));
+    timersRef.current.push(setTimeout(() => { if (!isDoneRef.current) setPhase("playing"); }, 3000));
+  }, [clearAllTimers]);
 
   // Start countdown on mount
   useEffect(() => {
@@ -59,6 +77,7 @@ export default function RhythmAssessment({ studentId, initialLevel }: Props) {
 
   const handleComplete = useCallback(
     (hits: boolean[]) => {
+      if (isDoneRef.current) return;
       const tappableIndices = pattern.beats
         .map((b, i) => (b.tappable ? i : -1))
         .filter((i) => i !== -1);
@@ -94,15 +113,21 @@ export default function RhythmAssessment({ studentId, initialLevel }: Props) {
       }
 
       const prevId = pattern.id;
-      setTimeout(() => {
-        setPattern(pickPattern(newLevel, prevId));
-        runCountdown();
+      const t = setTimeout(() => {
+        if (!isDoneRef.current) {
+          setPattern(pickPattern(newLevel, prevId));
+          runCountdown();
+        }
       }, 1500);
+      timersRef.current.push(t);
     },
     [pattern, level, correctStreak, wrongStreak, runCountdown]
   );
 
   const handleFinish = useCallback(async () => {
+    // Cancel any pending timers to prevent state updates after finish
+    clearAllTimers();
+    isDoneRef.current = true;
     setSaving(true);
     const score =
       totalTappable > 0 ? Math.round((totalHits / totalTappable) * 100) : 0;
@@ -119,7 +144,7 @@ export default function RhythmAssessment({ studentId, initialLevel }: Props) {
     if (error) console.error("Failed to save rhythm assessment:", error);
     setSaving(false);
     setIsDone(true);
-  }, [studentId, totalHits, totalTappable, maxLevel]);
+  }, [studentId, totalHits, totalTappable, maxLevel, clearAllTimers]);
 
   const score =
     totalTappable > 0 ? Math.round((totalHits / totalTappable) * 100) : 0;
@@ -162,7 +187,7 @@ export default function RhythmAssessment({ studentId, initialLevel }: Props) {
       <div className="flex items-center justify-between">
         <button
           onClick={handleFinish}
-          disabled={saving || phase === "playing"}
+          disabled={saving || phase === "playing" || phase === "feedback"}
           className="text-sm text-brand-muted border border-brand-border rounded-xl px-3 py-1.5 disabled:opacity-40"
         >
           {saving ? "שומר..." : "סיום מבחן"}
