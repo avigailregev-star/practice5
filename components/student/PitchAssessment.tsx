@@ -53,6 +53,7 @@ export default function PitchAssessment({ studentId, initialLevel }: Props) {
 
   // ── Mutable refs (read inside RAF loop without stale closure) ─────────────
   const rafRef = useRef<number>(0);
+  const audioCtxRef = useRef<AudioContext | null>(null);
   const isDoneRef = useRef(false);
   const phaseRef = useRef<Phase>("listening");
   const currentNoteRef = useRef<PitchNote>(currentNote);
@@ -176,6 +177,7 @@ export default function PitchAssessment({ studentId, initialLevel }: Props) {
         streamRef.current = stream;
 
         const audioCtx = new AudioContext();
+        audioCtxRef.current = audioCtx;
         const analyser = audioCtx.createAnalyser();
         analyser.fftSize = 4096;
         audioCtx.createMediaStreamSource(stream).connect(analyser);
@@ -225,6 +227,7 @@ export default function PitchAssessment({ studentId, initialLevel }: Props) {
       cancelAnimationFrame(rafRef.current);
       streamRef.current?.getTracks().forEach((t) => t.stop());
       if (noSoundTimerRef.current) clearTimeout(noSoundTimerRef.current);
+      audioCtxRef.current?.close().catch(() => {});
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
