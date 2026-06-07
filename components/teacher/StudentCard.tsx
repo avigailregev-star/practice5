@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { refreshWeeklySummary } from "@/app/actions/summary";
 
 const SKILL_LABEL: Record<string, string> = {
   notes: "קריאת תווים",
@@ -21,10 +22,31 @@ function timeAgo(dateStr: string): string {
   return "עכשיו";
 }
 
+function formatDate(dateStr: string): string {
+  return new Date(dateStr).toLocaleDateString("he-IL", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  });
+}
+
 function ratingBadge(avg: number): { emoji: string; label: string } {
   if (avg < 1.7) return { emoji: "😊", label: "קל בממוצע" };
   if (avg <= 2.3) return { emoji: "😐", label: "בסדר בממוצע" };
   return { emoji: "😓", label: "קשה בממוצע" };
+}
+
+function scoreColor(score: number | null): string {
+  if (score === null) return "text-brand-muted bg-brand-bg border-brand-border";
+  if (score >= 80) return "text-green-700 bg-green-50 border-green-200";
+  if (score >= 50) return "text-amber-600 bg-amber-50 border-amber-200";
+  return "text-red-600 bg-red-50 border-red-200";
+}
+
+interface DomainScores {
+  notes: number | null;
+  rhythm: number | null;
+  pitch: number | null;
 }
 
 interface Session {
@@ -41,6 +63,7 @@ interface LastSession {
 }
 
 interface StudentCardProps {
+  studentId: string;
   name: string;
   level: number;
   xp: number;
@@ -49,9 +72,13 @@ interface StudentCardProps {
   avgRating?: number;
   sessions?: Session[];
   recommendedLevel?: number | null;
+  domainScores: DomainScores | null;
+  weeklySummary: string | null;
+  summaryUpdatedAt: string | null;
 }
 
 export default function StudentCard({
+  studentId,
   name,
   level,
   xp,
@@ -60,14 +87,36 @@ export default function StudentCard({
   avgRating,
   sessions = [],
   recommendedLevel,
+  domainScores,
+  weeklySummary: initialSummary,
+  summaryUpdatedAt: initialUpdatedAt,
 }: StudentCardProps) {
   const [open, setOpen] = useState(false);
+  const [summary, setSummary] = useState<string | null>(initialSummary);
+  const [updatedAt, setUpdatedAt] = useState<string | null>(initialUpdatedAt);
+  const [refreshing, setRefreshing] = useState(false);
+  const [refreshError, setRefreshError] = useState<string | null>(null);
+
   const initial = name[0] ?? "?";
   const practicedToday = lastSession
     ? new Date(lastSession.completed_at).toDateString() === new Date().toDateString()
     : false;
 
   const badge = avgRating != null ? ratingBadge(avgRating) : null;
+
+  async function handleRefresh() {
+    setRefreshing(true);
+    setRefreshError(null);
+    try {
+      const result = await refreshWeeklySummary(studentId);
+      setSummary(result);
+      setUpdatedAt(new Date().toISOString());
+    } catch {
+      setRefreshError("שגיאה בייצור הסיכום — נסי שוב");
+    } finally {
+      setRefreshing(false);
+    }
+  }
 
   return (
     <div className="bg-brand-card rounded-2xl border border-brand-border overflow-hidden">
@@ -126,6 +175,58 @@ export default function StudentCard({
             <p className="text-lg font-bold text-brand-teal">{sessionCount}</p>
             <p className="text-xs text-brand-muted">תרגולים</p>
           </div>
+        </div>
+
+        {/* Domain score boxes */}
+        <div className="grid grid-cols-3 gap-2 mt-3">
+          {(
+            [
+              { key: "notes", label: "🎵 תווים" },
+              { key: "rhythm", label: "🥁 מקצב" },
+              { key: "pitch", label: "🎤 צליל" },
+            ] as const
+          ).map(({ key, label }) => {
+            const score = domainScores?.[key] ?? null;
+            return (
+              <div
+                key={key}
+                className={`rounded-xl border px-2 py-2 text-center ${scoreColor(score)}`}
+              >
+                <p className="text-xs mb-0.5">{label}</p>
+                <p className="text-sm font-bold">
+                  {score !== null ? `${score}%` : "—"}
+                </p>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* AI Weekly Summary */}
+        <div className="mt-3 bg-purple-50 border border-purple-200 rounded-xl px-3 py-2">
+          <div className="flex items-start justify-between gap-2">
+            <p className="text-xs text-purple-800 flex-1 leading-relaxed">
+              {summary ?? (
+                <span className="text-purple-500 italic">
+                  לחצי על רענן לייצור סיכום שבועי 🤖
+                </span>
+              )}
+            </p>
+            <button
+              onClick={handleRefresh}
+              disabled={refreshing}
+              className="flex-shrink-0 text-xs text-purple-700 border border-purple-300 bg-white rounded-lg px-2 py-1 hover:bg-purple-50 disabled:opacity-50 transition-colors"
+            >
+              {refreshing ? "⏳" : "רענן"}
+            </button>
+          </div>
+          {refreshError && (
+            <p className="text-xs text-red-500 mt-1">{refreshError}</p>
+          )}
+          {updatedAt && (
+            <p className="text-xs text-purple-400 mt-1">
+              עודכן: {formatDate(updatedAt)}
+            </p>
+          )}
         </div>
 
         {/* Toggle button */}
