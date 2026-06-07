@@ -20,12 +20,14 @@ export async function refreshWeeklySummary(studentId: string): Promise<string> {
 
   if (callerProfile?.role !== "teacher") throw new Error("Unauthorized");
 
-  // Fetch student name
+  // Fetch student profile and verify they are a student
   const { data: studentProfile } = await supabase
     .from("profiles")
-    .select("name")
+    .select("name, role")
     .eq("id", studentId)
-    .single() as { data: { name: string } | null };
+    .single() as { data: { name: string; role: string } | null };
+
+  if (studentProfile?.role !== "student") throw new Error("Target is not a student");
 
   const studentName = studentProfile?.name ?? "התלמיד";
 
@@ -52,7 +54,7 @@ export async function refreshWeeklySummary(studentId: string): Promise<string> {
   // Fetch last 10 practice sessions
   const { data: sessions } = await supabase
     .from("practice_sessions")
-    .select("skill_type, duration_minutes, completed_at, self_rating")
+    .select("skill_type, duration_minutes, completed_at")
     .eq("student_id", studentId)
     .not("completed_at", "is", null)
     .order("completed_at", { ascending: false })
@@ -61,7 +63,6 @@ export async function refreshWeeklySummary(studentId: string): Promise<string> {
         skill_type: string;
         duration_minutes: number;
         completed_at: string;
-        self_rating: number | null;
       }[] | null;
     };
 
@@ -97,24 +98,32 @@ export async function refreshWeeklySummary(studentId: string): Promise<string> {
 
 כתוב רק את הסיכום, ללא כותרת וללא פתיחה כמו "סיכום:".`;
 
-  const message = await anthropic.messages.create({
-    model: "claude-3-5-haiku-20241022",
-    max_tokens: 256,
-    messages: [{ role: "user", content: prompt }],
-  });
+  let summary: string;
+  try {
+    const message = await anthropic.messages.create({
+      model: "claude-3-5-haiku-20241022",
+      max_tokens: 256,
+      messages: [{ role: "user", content: prompt }],
+    });
 
-  const summary =
-    message.content[0].type === "text" ? message.content[0].text.trim() : "";
+    summary =
+      message.content[0].type === "text" ? message.content[0].text.trim() : "";
+  } catch (error) {
+    console.error("Claude API error:", error);
+    throw new Error("Failed to generate summary");
+  }
 
-  // Save to profiles
+  // Save to profiles and check for errors
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  await (supabase as any)
+  const { error: saveError } = await (supabase as any)
     .from("profiles")
     .update({
       weekly_summary: summary,
       summary_updated_at: new Date().toISOString(),
     })
     .eq("id", studentId);
+
+  if (saveError) throw new Error("Failed to save summary");
 
   return summary;
 }
