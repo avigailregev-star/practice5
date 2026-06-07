@@ -101,7 +101,7 @@ export async function refreshWeeklySummary(studentId: string): Promise<{ summary
   let summary: string;
   try {
     const message = await anthropic.messages.create({
-      model: "claude-3-5-haiku-20241022",
+      model: "claude-haiku-4-5",
       max_tokens: 256,
       messages: [{ role: "user", content: prompt }],
     });
