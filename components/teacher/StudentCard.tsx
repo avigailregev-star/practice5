@@ -109,10 +109,15 @@ export default function StudentCard({
     setRefreshError(null);
     try {
       const result = await refreshWeeklySummary(studentId);
-      setSummary(result);
-      setUpdatedAt(new Date().toISOString());
-    } catch {
-      setRefreshError("שגיאה בייצור הסיכום — נסי שוב");
+      setSummary(result.summary);
+      setUpdatedAt(result.updatedAt);
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "";
+      setRefreshError(
+        msg === "Unauthorized"
+          ? "פג תוקף ההתחברות — יש להתחבר מחדש"
+          : "שגיאה בייצור הסיכום — נסי שוב"
+      );
     } finally {
       setRefreshing(false);
     }

@@ -5,7 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
-export async function refreshWeeklySummary(studentId: string): Promise<string> {
+export async function refreshWeeklySummary(studentId: string): Promise<{ summary: string; updatedAt: string }> {
   const supabase = await createClient();
 
   // Auth check — caller must be a teacher
@@ -125,5 +125,6 @@ export async function refreshWeeklySummary(studentId: string): Promise<string> {
 
   if (saveError) throw new Error("Failed to save summary");
 
-  return summary;
+  const updatedAt = new Date().toISOString();
+  return { summary, updatedAt };
 }
