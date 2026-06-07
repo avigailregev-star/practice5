@@ -60,25 +60,23 @@ export default async function PracticePage() {
           <WeeklyProgress practicedDays={practicedDays} />
         </div>
 
-        {/* Assessment button — always visible */}
-        <div className="mx-4 mt-3">
-          <a
-            href="/practice/assess"
-            className="flex items-center justify-between w-full bg-white border border-brand-border rounded-2xl px-4 py-3 shadow-sm active:scale-95 transition-transform"
-          >
-            <span className="text-brand-muted text-sm">בדוק את הרמה שלך</span>
-            <span className="text-xl">🎵</span>
-          </a>
-        </div>
-
         {/* Teal calibration card — shown until all 3 domain levels are set */}
         {(profile?.level_notes == null || profile?.level_rhythm == null || profile?.level_pitch == null) && (
-          <div className="mx-4 mt-2 rounded-2xl overflow-hidden shadow-sm">
+          <div className="mx-4 mt-3 rounded-2xl overflow-hidden shadow-sm">
             <div className="bg-gradient-to-br from-teal-500 to-cyan-600 px-4 pt-3 pb-3">
-              <p className="text-white text-xs font-bold text-center tracking-wide mb-2">
-                🎯 להתאמת הרמה — לחצי עליי
+              <p className="text-white text-sm font-bold text-center mb-2">
+                בדוק את הרמה שלך
               </p>
               <div className="flex flex-col gap-2">
+                <a
+                  href="/practice/assess"
+                  className="flex items-center justify-between bg-white/20 hover:bg-white/30 active:scale-95 transition-all rounded-xl px-4 py-2.5"
+                >
+                  <span className="text-white text-sm">
+                    {profile?.level_notes != null ? "✓ " : ""}זיהוי תווים
+                  </span>
+                  <span className="text-lg">🎵</span>
+                </a>
                 <a
                   href="/practice/rhythm"
                   className="flex items-center justify-between bg-white/20 hover:bg-white/30 active:scale-95 transition-all rounded-xl px-4 py-2.5"
