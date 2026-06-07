@@ -70,6 +70,12 @@ export function pickPitchNote(level: DifficultyLevel, previousNoteName?: string)
   return candidates[Math.floor(Math.random() * candidates.length)];
 }
 
+// ── Pitch detection constants ─────────────────────────────────────────────────
+const SILENCE_THRESHOLD = 0.01;     // RMS below this = silence
+const MIN_FREQ_HZ = 60;             // lower bound: ~B1
+const MAX_FREQ_HZ = 1200;           // upper bound: ~D6
+const CLARITY_THRESHOLD = 0.9;      // minimum normalized autocorrelation to accept pitch
+
 // ── Pitch detection ───────────────────────────────────────────────────────────
 
 /**
@@ -77,16 +83,18 @@ export function pickPitchNote(level: DifficultyLevel, previousNoteName?: string)
  * Returns fundamental frequency in Hz, or null if no clear pitch found (silence or noise).
  */
 export function detectPitch(buffer: Float32Array, sampleRate: number): number | null {
+  if (buffer.length === 0) return null;
+
   const SIZE = buffer.length;
 
   // 1. RMS silence check
   let rms = 0;
   for (let i = 0; i < SIZE; i++) rms += buffer[i] * buffer[i];
-  if (Math.sqrt(rms / SIZE) < 0.01) return null;
+  if (Math.sqrt(rms / SIZE) < SILENCE_THRESHOLD) return null;
 
-  // 2. Lag search range: 60 Hz – 1200 Hz
-  const minLag = Math.floor(sampleRate / 1200);
-  const maxLag = Math.min(Math.floor(sampleRate / 60), SIZE - 1);
+  // 2. Lag search range: MIN_FREQ_HZ – MAX_FREQ_HZ
+  const minLag = Math.floor(sampleRate / MAX_FREQ_HZ);
+  const maxLag = Math.min(Math.floor(sampleRate / MIN_FREQ_HZ), SIZE - 1);
 
   // 3. Find lag with maximum autocorrelation
   let bestLag = -1;
@@ -106,7 +114,7 @@ export function detectPitch(buffer: Float32Array, sampleRate: number): number | 
   // 4. Normalize against signal energy (lag=0 correlation)
   let energy = 0;
   for (let i = 0; i < SIZE; i++) energy += buffer[i] * buffer[i];
-  if (energy === 0 || bestCorr / energy < 0.9) return null;
+  if (energy === 0 || bestCorr / energy < CLARITY_THRESHOLD) return null;
 
   // 5. Parabolic interpolation for sub-sample accuracy
   const prev = _autocorr(buffer, SIZE, Math.max(0, bestLag - 1));
@@ -131,7 +139,7 @@ function _autocorr(buf: Float32Array, size: number, lag: number): number {
  * Returns null if frequency is outside supported range (60 Hz – 1200 Hz).
  */
 export function frequencyToNote(hz: number): DetectedNote | null {
-  if (hz < 60 || hz > 1200) return null;
+  if (hz < MIN_FREQ_HZ || hz > MAX_FREQ_HZ) return null;
 
   // MIDI note number: A4 = 440 Hz = MIDI 69
   const midi = 12 * Math.log2(hz / 440) + 69;
