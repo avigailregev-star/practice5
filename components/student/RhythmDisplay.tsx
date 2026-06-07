@@ -7,9 +7,10 @@ interface Props {
   pattern: RhythmPattern;
   level: DifficultyLevel;
   onComplete: (hits: boolean[]) => void;
+  preview?: boolean;
 }
 
-export default function RhythmDisplay({ pattern, level, onComplete }: Props) {
+export default function RhythmDisplay({ pattern, level, onComplete, preview }: Props) {
   const bpm = BPM[level];
   const msPerQuarter = 60000 / bpm;
   const totalMs = pattern.totalDuration * msPerQuarter;
@@ -62,6 +63,7 @@ export default function RhythmDisplay({ pattern, level, onComplete }: Props) {
   }, []);
 
   useEffect(() => {
+    if (preview) return;
     doneRef.current = false;
     soundedRef.current = new Set();
     tapTimesRef.current = [];
@@ -163,6 +165,7 @@ export default function RhythmDisplay({ pattern, level, onComplete }: Props) {
               left: "-10px",
               background: "#22c55e",
               boxShadow: "0 0 10px rgba(34,197,94,0.7)",
+              opacity: preview ? 0 : 1,
             }}
           />
         </div>
@@ -173,6 +176,7 @@ export default function RhythmDisplay({ pattern, level, onComplete }: Props) {
         <button
           onPointerDown={handleTap}
           aria-label="הקש"
+          disabled={preview}
           className={`w-28 h-28 rounded-full flex items-center justify-center transition-all duration-75 select-none ${
             tapped ? "scale-90" : "scale-100"
           }`}

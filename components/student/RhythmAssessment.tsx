@@ -11,7 +11,7 @@ import {
 } from "@/lib/rhythms";
 import { scoreLabel } from "@/lib/notes";
 
-type Phase = "countdown" | "playing" | "feedback";
+type Phase = "preview" | "countdown" | "playing" | "feedback";
 
 interface Props {
   studentId: string;
@@ -33,7 +33,7 @@ export default function RhythmAssessment({ studentId, initialLevel }: Props) {
 
   const [level, setLevel] = useState<DifficultyLevel>(startLevel);
   const [pattern, setPattern] = useState<RhythmPattern>(() => pickPattern(startLevel));
-  const [phase, setPhase] = useState<Phase>("countdown");
+  const [phase, setPhase] = useState<Phase>("preview");
   const [countdown, setCountdown] = useState(3);
   const [correctStreak, setCorrectStreak] = useState(0);
   const [wrongStreak, setWrongStreak] = useState(0);
@@ -61,13 +61,17 @@ export default function RhythmAssessment({ studentId, initialLevel }: Props) {
   }, [clearAllTimers]);
 
   const runCountdown = useCallback(() => {
-    // Cancel any pending timers before starting a new sequence
     clearAllTimers();
-    setPhase("countdown");
-    setCountdown(3);
-    timersRef.current.push(setTimeout(() => { if (!isDoneRef.current) setCountdown(2); }, 1000));
-    timersRef.current.push(setTimeout(() => { if (!isDoneRef.current) setCountdown(1); }, 2000));
-    timersRef.current.push(setTimeout(() => { if (!isDoneRef.current) setPhase("playing"); }, 3000));
+    setPhase("preview");
+    timersRef.current.push(setTimeout(() => {
+      if (!isDoneRef.current) {
+        setPhase("countdown");
+        setCountdown(3);
+        timersRef.current.push(setTimeout(() => { if (!isDoneRef.current) setCountdown(2); }, 1000));
+        timersRef.current.push(setTimeout(() => { if (!isDoneRef.current) setCountdown(1); }, 2000));
+        timersRef.current.push(setTimeout(() => { if (!isDoneRef.current) setPhase("playing"); }, 3000));
+      }
+    }, 2500));
   }, [clearAllTimers]);
 
   // Start countdown on mount
@@ -187,7 +191,7 @@ export default function RhythmAssessment({ studentId, initialLevel }: Props) {
       <div className="flex items-center justify-between">
         <button
           onClick={handleFinish}
-          disabled={saving || phase === "playing" || phase === "feedback"}
+          disabled={saving || phase === "playing" || phase === "feedback" || phase === "preview"}
           className="text-sm text-brand-muted border border-brand-border rounded-xl px-3 py-1.5 disabled:opacity-40"
         >
           {saving ? "שומר..." : "סיום מבחן"}
@@ -215,6 +219,21 @@ export default function RhythmAssessment({ studentId, initialLevel }: Props) {
           />
         ))}
       </div>
+
+      {/* Preview — show beat track before starting */}
+      {phase === "preview" && (
+        <div className="flex flex-col gap-2">
+          <p className="text-center text-sm font-semibold text-brand-teal">
+            הסתכלי על תבנית המקצב 👀
+          </p>
+          <RhythmDisplay
+            pattern={pattern}
+            level={level}
+            onComplete={handleComplete}
+            preview={true}
+          />
+        </div>
+      )}
 
       {/* Countdown */}
       {phase === "countdown" && (
