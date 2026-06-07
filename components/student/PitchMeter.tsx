@@ -107,6 +107,12 @@ export default function PitchMeter({ detectedNote, isListening }: Props) {
           ? `${detectedNote.hebrewName} — ${deviationLabel}`
           : "שר/נגן את התו..."}
       </div>
+      {/* Debug: show raw Hz */}
+      {detectedNote && (
+        <div className="text-center text-[10px] text-brand-muted mt-1">
+          {Math.round(detectedNote.frequency)} Hz · {detectedNote.name}{detectedNote.octave}
+        </div>
+      )}
     </div>
   );
 }

@@ -168,7 +168,14 @@ export default function PitchAssessment({ studentId, initialLevel }: Props) {
     let cancelled = false;
 
     navigator.mediaDevices
-      .getUserMedia({ audio: true, video: false })
+      .getUserMedia({
+          audio: {
+            echoCancellation: false,
+            noiseSuppression: false,
+            autoGainControl: false,
+          },
+          video: false,
+        })
       .then((stream) => {
         if (cancelled) {
           stream.getTracks().forEach((t) => t.stop());
