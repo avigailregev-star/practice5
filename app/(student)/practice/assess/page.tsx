@@ -10,11 +10,14 @@ export default async function AssessPage() {
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("level")
+    .select("level, level_notes")
     .eq("id", user.id)
-    .single() as { data: { level: number } | null };
+    .single() as { data: { level: number; level_notes: number | null } | null };
 
-  const initialLevel = (Math.max(1, Math.min(3, profile?.level ?? 1)) as DifficultyLevel);
+  const initialLevel = Math.max(
+    1,
+    Math.min(3, profile?.level_notes ?? profile?.level ?? 1)
+  ) as DifficultyLevel;
 
   return (
     <main className="max-w-sm mx-auto bg-brand-bg min-h-screen">

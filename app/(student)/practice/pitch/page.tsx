@@ -12,13 +12,13 @@ export default async function PitchPage() {
 
   const { data: profile } = (await supabase
     .from("profiles")
-    .select("level")
+    .select("level_pitch")
     .eq("id", user.id)
-    .single()) as { data: { level: number } | null };
+    .single()) as { data: { level_pitch: number | null } | null };
 
   const initialLevel = Math.max(
     1,
-    Math.min(3, profile?.level ?? 1)
+    Math.min(3, profile?.level_pitch ?? 1)
   ) as DifficultyLevel;
 
   return (

@@ -12,13 +12,13 @@ export default async function RhythmPage() {
 
   const { data: profile } = (await supabase
     .from("profiles")
-    .select("level")
+    .select("level_rhythm")
     .eq("id", user.id)
-    .single()) as { data: { level: number } | null };
+    .single()) as { data: { level_rhythm: number | null } | null };
 
   const initialLevel = Math.max(
     1,
-    Math.min(3, profile?.level ?? 1)
+    Math.min(3, profile?.level_rhythm ?? 1)
   ) as DifficultyLevel;
 
   return (
