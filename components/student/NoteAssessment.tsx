@@ -109,6 +109,36 @@ export default function NoteAssessment({ studentId, initialLevel }: Props) {
       setTotalAnswered(newAnswered);
       setTotalCorrect(newCorrect);
 
+      if (newAnswered >= 6) {
+        // Auto-finish after 6 questions
+        const delay = isCorrect ? 700 : 700;
+        setAnimState(isCorrect ? "correct" : "wrong");
+        setTimeout(async () => {
+          setAnimState("idle");
+          setSaving(true);
+          const score = Math.round((newCorrect / newAnswered) * 100);
+          const supabase = createClient();
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          await (supabase as any).from("assessments").insert({
+            student_id: studentId,
+            type: "notes",
+            score,
+            max_level: maxLevel,
+            total_correct: newCorrect,
+            total_answered: newAnswered,
+          });
+          const domainLevel = score >= 80 ? 3 : score >= 50 ? 2 : 1;
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          await (supabase as any)
+            .from("profiles")
+            .update({ level_notes: domainLevel })
+            .eq("id", studentId);
+          setSaving(false);
+          setIsDone(true);
+        }, delay);
+        return;
+      }
+
       if (isCorrect) {
         const newStreak = correctStreak + 1;
         setCorrectStreak(newStreak);

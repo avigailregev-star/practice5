@@ -82,7 +82,7 @@ export default async function PracticePage() {
                   className="flex items-center justify-between bg-white/20 hover:bg-white/30 active:scale-95 transition-all rounded-xl px-4 py-2.5"
                 >
                   <span className="text-white text-sm">
-                    {profile?.level_rhythm != null ? "✓ " : ""}חוש מקצב
+                    {profile?.level_rhythm != null ? "✓ " : ""}חוש קצב
                   </span>
                   <span className="text-lg">🥁</span>
                 </a>

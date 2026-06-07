@@ -41,6 +41,7 @@ export default function RhythmAssessment({ studentId, initialLevel }: Props) {
   const [totalTappable, setTotalTappable] = useState(0);
   const [maxLevel, setMaxLevel] = useState<DifficultyLevel>(startLevel);
   const [lastResult, setLastResult] = useState<"correct" | "wrong" | null>(null);
+  const [roundNum, setRoundNum] = useState(0);
   const [isDone, setIsDone] = useState(false);
   const [saving, setSaving] = useState(false);
 
@@ -93,6 +94,8 @@ export default function RhythmAssessment({ studentId, initialLevel }: Props) {
       setTotalTappable((t) => t + tappable);
       setLastResult(isCorrect ? "correct" : "wrong");
       setPhase("feedback");
+      const newRoundNum = roundNum + 1;
+      setRoundNum(newRoundNum);
 
       let newLevel = level;
       if (isCorrect) {
@@ -117,15 +120,18 @@ export default function RhythmAssessment({ studentId, initialLevel }: Props) {
       }
 
       const prevId = pattern.id;
-      const t = setTimeout(() => {
-        if (!isDoneRef.current) {
-          setPattern(pickPattern(newLevel, prevId));
-          runCountdown();
-        }
-      }, 1500);
-      timersRef.current.push(t);
+      if (newRoundNum < 6) {
+        const t = setTimeout(() => {
+          if (!isDoneRef.current) {
+            setPattern(pickPattern(newLevel, prevId));
+            runCountdown();
+          }
+        }, 1500);
+        timersRef.current.push(t);
+      }
+      // if newRoundNum >= 6, useEffect below will trigger handleFinish
     },
-    [pattern, level, correctStreak, wrongStreak, runCountdown]
+    [pattern, level, correctStreak, wrongStreak, roundNum, runCountdown]
   );
 
   const handleFinish = useCallback(async () => {
@@ -155,6 +161,16 @@ export default function RhythmAssessment({ studentId, initialLevel }: Props) {
     setSaving(false);
     setIsDone(true);
   }, [studentId, totalHits, totalTappable, maxLevel, clearAllTimers]);
+
+  // Auto-finish after 6 rounds
+  useEffect(() => {
+    if (roundNum >= 6 && !isDoneRef.current) {
+      const t = setTimeout(() => {
+        if (!isDoneRef.current) handleFinish();
+      }, 1600);
+      return () => clearTimeout(t);
+    }
+  }, [roundNum, handleFinish]);
 
   const score =
     totalTappable > 0 ? Math.round((totalHits / totalTappable) * 100) : 0;
