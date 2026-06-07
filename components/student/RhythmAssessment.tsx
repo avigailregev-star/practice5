@@ -191,7 +191,7 @@ export default function RhythmAssessment({ studentId, initialLevel }: Props) {
       <div className="flex items-center justify-between">
         <button
           onClick={handleFinish}
-          disabled={saving || phase === "playing" || phase === "feedback" || phase === "preview"}
+          disabled={saving || phase === "playing" || phase === "feedback" || phase === "preview" || phase === "countdown"}
           className="text-sm text-brand-muted border border-brand-border rounded-xl px-3 py-1.5 disabled:opacity-40"
         >
           {saving ? "שומר..." : "סיום מבחן"}
@@ -220,37 +220,32 @@ export default function RhythmAssessment({ studentId, initialLevel }: Props) {
         ))}
       </div>
 
-      {/* Preview — show beat track before starting */}
-      {phase === "preview" && (
-        <div className="flex flex-col gap-2">
-          <p className="text-center text-sm font-semibold text-brand-teal">
-            הסתכלי על תבנית המקצב 👀
-          </p>
+      {/* Beat track — shown during preview, countdown, and playing */}
+      {(phase === "preview" || phase === "countdown" || phase === "playing") && (
+        <div className="relative">
           <RhythmDisplay
             pattern={pattern}
             level={level}
             onComplete={handleComplete}
-            preview={true}
+            preview={phase !== "playing"}
           />
+          {/* Countdown overlay */}
+          {phase === "countdown" && (
+            <div className="absolute inset-0 flex items-center justify-center pointer-events-none" style={{ zIndex: 10 }}>
+              <div className="bg-white/80 rounded-2xl px-8 py-4 shadow-lg backdrop-blur-sm">
+                <p className="text-7xl font-extrabold text-brand-teal leading-none">{countdown}</p>
+              </div>
+            </div>
+          )}
+          {/* Preview label */}
+          {phase === "preview" && (
+            <div className="absolute inset-x-0 bottom-16 flex justify-center pointer-events-none">
+              <p className="text-sm font-semibold text-brand-teal bg-white/90 px-3 py-1 rounded-full shadow">
+                הסתכלי על תבנית המקצב 👀
+              </p>
+            </div>
+          )}
         </div>
-      )}
-
-      {/* Countdown */}
-      {phase === "countdown" && (
-        <div className="flex items-center justify-center h-64">
-          <p className="text-7xl font-extrabold text-brand-teal animate-pulse">
-            {countdown}
-          </p>
-        </div>
-      )}
-
-      {/* Playing */}
-      {phase === "playing" && (
-        <RhythmDisplay
-          pattern={pattern}
-          level={level}
-          onComplete={handleComplete}
-        />
       )}
 
       {/* Feedback */}
