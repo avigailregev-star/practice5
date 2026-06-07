@@ -273,6 +273,12 @@ export default function PitchAssessment({ studentId, initialLevel }: Props) {
       total_answered: totalAnswered,
     });
     if (error) console.error("Failed to save pitch assessment:", error);
+    const domainLevel = score >= 80 ? 3 : score >= 50 ? 2 : 1;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    await (supabase as any)
+      .from("profiles")
+      .update({ level_pitch: domainLevel })
+      .eq("id", studentId);
     setSaving(false);
     setIsDone(true);
   }, [studentId, totalCorrect, totalAnswered, maxLevel]);
