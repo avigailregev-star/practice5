@@ -104,7 +104,7 @@ export default async function PracticePage() {
         <div className="flex justify-center mt-5 mb-1">
           <ViolinMascot
             mood={practicedDays.length >= 5 ? "excited" : practicedDays.length >= 3 ? "happy" : "encouraging"}
-            size={200}
+            size={260}
           />
         </div>
 
