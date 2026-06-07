@@ -191,7 +191,7 @@ export default function RhythmAssessment({ studentId, initialLevel }: Props) {
       <div className="flex items-center justify-between">
         <button
           onClick={handleFinish}
-          disabled={saving || phase === "playing" || phase === "feedback" || phase === "preview" || phase === "countdown"}
+          disabled={saving || phase === "playing" || phase === "feedback"}
           className="text-sm text-brand-muted border border-brand-border rounded-xl px-3 py-1.5 disabled:opacity-40"
         >
           {saving ? "שומר..." : "סיום מבחן"}
