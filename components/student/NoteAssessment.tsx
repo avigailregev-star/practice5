@@ -171,6 +171,12 @@ export default function NoteAssessment({ studentId, initialLevel }: Props) {
       total_correct: totalCorrect,
       total_answered: totalAnswered,
     });
+    const domainLevel = score >= 80 ? 3 : score >= 50 ? 2 : 1;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    await (supabase as any)
+      .from("profiles")
+      .update({ level_notes: domainLevel })
+      .eq("id", studentId);
     setSaving(false);
     if (error) {
       console.error("Failed to save assessment:", error);
