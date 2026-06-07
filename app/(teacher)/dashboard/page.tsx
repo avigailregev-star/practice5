@@ -36,12 +36,20 @@ export default async function DashboardPage() {
 
   const studentList = students ?? [];
 
-  // Fetch all assessments to compute per-domain averages per student
-  const { data: allAssessments } = await supabase
+  // Fetch assessments scoped to current students only
+  const studentIds = studentList.map((s) => s.id);
+
+  const { data: allAssessments, error: assessmentsError } = await supabase
     .from("assessments")
-    .select("student_id, type, score") as {
+    .select("student_id, type, score")
+    .in("student_id", studentIds.length > 0 ? studentIds : ["no-match"]) as {
       data: { student_id: string; type: string; score: number }[] | null;
+      error: unknown;
     };
+
+  if (assessmentsError) {
+    console.error("Failed to fetch assessments:", assessmentsError);
+  }
 
   // Build domainScoresMap: studentId → { notes, rhythm, pitch } avg %
   const domainAccum = new Map<string, Record<string, number[]>>();
@@ -54,13 +62,14 @@ export default async function DashboardPage() {
   }
 
   const domainScoresMap = new Map<string, { notes: number | null; rhythm: number | null; pitch: number | null }>();
+  const calcAvg = (arr: number[]) =>
+    arr.length > 0 ? Math.round(arr.reduce((a, b) => a + b, 0) / arr.length) : null;
+
   for (const [studentId, accum] of domainAccum) {
-    const avg = (arr: number[]) =>
-      arr.length > 0 ? Math.round(arr.reduce((a, b) => a + b, 0) / arr.length) : null;
     domainScoresMap.set(studentId, {
-      notes: avg(accum.notes),
-      rhythm: avg(accum.rhythm),
-      pitch: avg(accum.pitch),
+      notes: calcAvg(accum.notes),
+      rhythm: calcAvg(accum.rhythm),
+      pitch: calcAvg(accum.pitch),
     });
   }
 
