@@ -185,15 +185,19 @@ export default function PitchAssessment({ studentId, initialLevel }: Props) {
 
         const audioCtx = new AudioContext();
         audioCtxRef.current = audioCtx;
+        // Resume in case browser suspended it (common when created outside user gesture)
+        audioCtx.resume().catch(() => {});
         const analyser = audioCtx.createAnalyser();
         analyser.fftSize = 4096;
+        analyser.smoothingTimeConstant = 0.5;
         audioCtx.createMediaStreamSource(stream).connect(analyser);
 
-        const buffer = new Float32Array(analyser.fftSize);
+        // Use frequency-domain data for HPS-based pitch detection
+        const freqData = new Float32Array(analyser.frequencyBinCount);
 
         const loop = () => {
-          analyser.getFloatTimeDomainData(buffer);
-          const hz = detectPitch(buffer, audioCtx.sampleRate);
+          analyser.getFloatFrequencyData(freqData);
+          const hz = detectPitch(freqData, audioCtx.sampleRate, analyser.fftSize);
           const note = hz ? frequencyToNote(hz) : null;
 
           // Update meter display

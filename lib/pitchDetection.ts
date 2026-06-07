@@ -71,72 +71,84 @@ export function pickPitchNote(level: DifficultyLevel, previousNoteName?: string)
 }
 
 // ── Pitch detection constants ─────────────────────────────────────────────────
-const SILENCE_THRESHOLD = 0.002;    // RMS below this = silence
-const MIN_FREQ_HZ = 60;             // lower bound: ~B1
-const MAX_FREQ_HZ = 1200;           // upper bound: ~D6
-const CLARITY_THRESHOLD = 0.6;      // minimum normalized autocorrelation to accept pitch
+const MIN_FREQ_HZ = 60;    // lower bound: ~B1
+const MAX_FREQ_HZ = 1200;  // upper bound: ~D6
+const SILENCE_DB = -50;    // dB below this = silence in FFT data
 
-// ── Pitch detection ───────────────────────────────────────────────────────────
+// ── Pitch detection via HPS (Harmonic Product Spectrum) ───────────────────────
 
 /**
- * Autocorrelation-based pitch detection.
- * Returns fundamental frequency in Hz, or null if no clear pitch found (silence or noise).
+ * FFT-based pitch detection using Harmonic Product Spectrum.
+ * Takes frequency-domain data from AnalyserNode.getFloatFrequencyData() (values in dB).
+ * HPS multiplies the spectrum by downsampled copies — the product peaks at the fundamental
+ * even when harmonics are louder (works well for voice and violin).
+ *
+ * @param freqData  Float32Array from analyser.getFloatFrequencyData() — values in dB
+ * @param sampleRate  AudioContext.sampleRate (typically 44100 or 48000)
+ * @param fftSize  analyser.fftSize (e.g. 4096); frequencyBinCount = fftSize/2
+ * @returns fundamental frequency in Hz, or null if silence/no clear pitch
  */
-export function detectPitch(buffer: Float32Array, sampleRate: number): number | null {
-  if (buffer.length === 0) return null;
+export function detectPitch(
+  freqData: Float32Array,
+  sampleRate: number,
+  fftSize: number
+): number | null {
+  const binHz = sampleRate / fftSize;
+  const minBin = Math.max(1, Math.ceil(MIN_FREQ_HZ / binHz));
+  const maxBin = Math.min(freqData.length - 1, Math.floor(MAX_FREQ_HZ / binHz));
 
-  const SIZE = buffer.length;
+  // Silence check: is there ANY meaningful signal in range?
+  let maxDb = -Infinity;
+  for (let i = minBin; i <= maxBin; i++) {
+    if (freqData[i] > maxDb) maxDb = freqData[i];
+  }
+  if (maxDb < SILENCE_DB) return null;
 
-  // 1. RMS silence check
-  let rms = 0;
-  for (let i = 0; i < SIZE; i++) rms += buffer[i] * buffer[i];
-  if (Math.sqrt(rms / SIZE) < SILENCE_THRESHOLD) return null;
+  // Convert dB → linear magnitude
+  const linear = new Float32Array(freqData.length);
+  for (let i = 0; i < freqData.length; i++) {
+    linear[i] = Math.pow(10, freqData[i] / 20);
+  }
 
-  // 2. Lag search range: MIN_FREQ_HZ – MAX_FREQ_HZ
-  const minLag = Math.floor(sampleRate / MAX_FREQ_HZ);
-  const maxLag = Math.min(Math.floor(sampleRate / MIN_FREQ_HZ), SIZE - 1);
+  // HPS: multiply spectrum by H downsampled copies (harmonics 2, 3, 4, 5)
+  // hps[i] = L[i] * L[2i] * L[3i] * L[4i] * L[5i]
+  // The product is largest at the fundamental bin.
+  const hps = new Float32Array(maxBin + 1);
+  for (let i = minBin; i <= maxBin; i++) {
+    const h2 = linear[i * 2] ?? 0;
+    const h3 = linear[i * 3] ?? 0;
+    const h4 = linear[i * 4] ?? 0;
+    const h5 = linear[i * 5] ?? 0;
+    hps[i] = linear[i] * h2 * h3 * h4 * h5;
+  }
 
-  // 3. Find lag with maximum autocorrelation
-  let bestLag = -1;
-  let bestCorr = -Infinity;
-  for (let lag = minLag; lag <= maxLag; lag++) {
-    let corr = 0;
-    for (let i = 0; i < SIZE - lag; i++) {
-      corr += buffer[i] * buffer[i + lag];
-    }
-    if (corr > bestCorr) {
-      bestCorr = corr;
-      bestLag = lag;
+  // Find the peak bin in HPS
+  let peakBin = minBin;
+  let peakVal = 0;
+  for (let i = minBin; i <= maxBin; i++) {
+    if (hps[i] > peakVal) {
+      peakVal = hps[i];
+      peakBin = i;
     }
   }
-  if (bestLag === -1) return null;
 
-  // 4. Normalize against signal energy (lag=0 correlation)
-  let energy = 0;
-  for (let i = 0; i < SIZE; i++) energy += buffer[i] * buffer[i];
-  if (energy === 0 || bestCorr / energy < CLARITY_THRESHOLD) return null;
+  if (peakVal === 0) return null;
 
-  // 5. Parabolic interpolation for sub-sample accuracy
-  const prev = _autocorr(buffer, SIZE, Math.max(0, bestLag - 1));
-  const curr = bestCorr;
-  const next = _autocorr(buffer, SIZE, Math.min(SIZE - 1, bestLag + 1));
-  const denom = 2 * curr - prev - next;
-  const refined = denom === 0 ? bestLag : bestLag + (next - prev) / (2 * denom);
+  // Parabolic interpolation on HPS for sub-bin accuracy
+  const prev = peakBin > minBin ? hps[peakBin - 1] : hps[peakBin];
+  const curr = hps[peakBin];
+  const next = peakBin < maxBin ? hps[peakBin + 1] : hps[peakBin];
+  const denom = prev - 2 * curr + next;
+  const refinedBin = denom === 0 ? peakBin : peakBin - 0.5 * (next - prev) / denom;
 
-  return sampleRate / refined;
-}
-
-function _autocorr(buf: Float32Array, size: number, lag: number): number {
-  let c = 0;
-  for (let i = 0; i < size - lag; i++) c += buf[i] * buf[i + lag];
-  return c;
+  return refinedBin * binHz;
 }
 
 // ── Frequency → note mapping ──────────────────────────────────────────────────
 
 /**
  * Maps a frequency in Hz to the nearest note in 12-TET (A4 = 440 Hz).
- * Returns null if frequency is outside supported range (60 Hz – 1200 Hz).
+ * Returns null if frequency is outside supported range.
  */
 export function frequencyToNote(hz: number): DetectedNote | null {
   if (hz < MIN_FREQ_HZ || hz > MAX_FREQ_HZ) return null;
