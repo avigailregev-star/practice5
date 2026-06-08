@@ -54,11 +54,15 @@ export default function ExerciseCard({ exercise }: { exercise: Exercise }) {
         <p className="text-xs font-semibold text-brand-muted tracking-widest mb-3">שלבים</p>
         <ol className="space-y-2">
           {exercise.steps.map((step, i) => (
-            <li key={i} className="flex gap-3 text-sm text-brand-text">
-              <span className="flex-shrink-0 w-5 h-5 bg-brand-pink text-white rounded-full flex items-center justify-center text-xs font-bold">
+            <li
+              key={i}
+              className="anim-step flex gap-3 text-sm text-brand-text rounded-xl px-3 py-2 transition-colors hover:bg-brand-pink/8 cursor-default"
+              style={{ animationDelay: `${i * 120}ms` }}
+            >
+              <span className="flex-shrink-0 w-6 h-6 bg-brand-pink text-white rounded-full flex items-center justify-center text-xs font-bold shadow-sm">
                 {i + 1}
               </span>
-              <span>{step.replace(/^שלב \d+:\s*/, "")}</span>
+              <span className="pt-0.5">{step.replace(/^שלב \d+:\s*/, "")}</span>
             </li>
           ))}
         </ol>

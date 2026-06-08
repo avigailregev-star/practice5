@@ -102,6 +102,12 @@ body {
   75%      { transform: translateX(6px); }
 }
 
+@keyframes stepFadeIn {
+  from { opacity: 0; transform: translateX(18px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+.anim-step { animation: stepFadeIn 0.45s ease both; }
+
 .anim-note-bounce  { animation: noteBounce 0.5s ease; }
 .anim-note-shake   { animation: noteShake 0.5s ease; }
 .anim-note-spin    { animation: noteSpin 0.4s ease forwards; }
