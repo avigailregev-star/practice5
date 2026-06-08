@@ -1,8 +1,9 @@
 "use client";
 import type { Exercise } from "@/lib/ai/generate-exercise";
 import dynamic from "next/dynamic";
+import { useState } from "react";
 import NoteAnswer from "./NoteAnswer";
-import { Music, Activity, Layers, Lightbulb } from "lucide-react";
+import { Music, Activity, Layers, Lightbulb, Check } from "lucide-react";
 const MusicNotation = dynamic(() => import("./MusicNotation"), { ssr: false });
 const RhythmNotation = dynamic(() => import("./RhythmNotation"), { ssr: false });
 
@@ -19,6 +20,13 @@ const SKILL_ICON_BG: Record<string, string> = {
 };
 
 export default function ExerciseCard({ exercise }: { exercise: Exercise }) {
+  const [checked, setChecked] = useState<boolean[]>(() => exercise.steps.map(() => false));
+
+  const toggle = (i: number) =>
+    setChecked((prev) => prev.map((v, idx) => (idx === i ? !v : v)));
+
+  const allDone = checked.every(Boolean);
+
   return (
     <div className="bg-brand-card rounded-2xl border border-brand-border p-4">
       <div className="flex items-center gap-3 mb-4">
@@ -51,18 +59,38 @@ export default function ExerciseCard({ exercise }: { exercise: Exercise }) {
       )}
 
       <div className="bg-brand-card rounded-xl p-4 mb-4 border border-brand-border">
-        <p className="text-xs font-semibold text-brand-muted tracking-widest mb-3">שלבים</p>
+        <div className="flex items-center justify-between mb-3">
+          <p className="text-xs font-semibold text-brand-muted tracking-widest">שלבים</p>
+          {allDone && (
+            <span className="text-xs font-bold text-green-600 animate-bounce">✅ כל הכבוד!</span>
+          )}
+        </div>
         <ol className="space-y-2">
           {exercise.steps.map((step, i) => (
             <li
               key={i}
-              className="anim-step flex gap-3 text-sm text-brand-text rounded-xl px-3 py-2 transition-colors hover:bg-brand-pink/8 cursor-default"
+              onClick={() => toggle(i)}
+              className={`anim-step flex gap-3 text-sm rounded-xl px-3 py-2.5 cursor-pointer transition-all active:scale-98 select-none
+                ${checked[i]
+                  ? "bg-green-50 border border-green-200"
+                  : "hover:bg-brand-pink/8 border border-transparent"
+                }`}
               style={{ animationDelay: `${i * 120}ms` }}
             >
-              <span className="flex-shrink-0 w-6 h-6 bg-brand-pink text-white rounded-full flex items-center justify-center text-xs font-bold shadow-sm">
-                {i + 1}
+              {/* Checkbox */}
+              <span className={`flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center transition-all duration-200 shadow-sm
+                ${checked[i]
+                  ? "bg-green-500 scale-110"
+                  : "bg-brand-pink text-white text-xs font-bold"
+                }`}>
+                {checked[i]
+                  ? <Check size={13} strokeWidth={3} className="text-white" />
+                  : <span className="text-white text-xs font-bold">{i + 1}</span>
+                }
               </span>
-              <span className="pt-0.5">{step.replace(/^שלב \d+:\s*/, "")}</span>
+              <span className={`pt-0.5 transition-all duration-200 ${checked[i] ? "line-through text-brand-muted" : "text-brand-text"}`}>
+                {step.replace(/^שלב \d+:\s*/, "")}
+              </span>
             </li>
           ))}
         </ol>
