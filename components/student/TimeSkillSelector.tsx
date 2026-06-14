@@ -3,7 +3,7 @@ import { useState } from "react";
 import { Music, Activity, Layers } from "lucide-react";
 import { startPracticeSession } from "@/app/actions/practice";
 
-const DURATIONS = [5, 10, 15, 20] as const;
+const DURATIONS = [5, 10] as const;
 const SKILLS = [
   { value: "notes",  label: "קריאת תווים", Icon: Music,    activeBorder: "border-brand-pink",   activeBg: "bg-pink-50",   iconBg: "bg-pink-100",   iconText: "text-brand-pink",   dot: "bg-brand-pink" },
   { value: "rhythm", label: "מקצבים",      Icon: Activity, activeBorder: "border-brand-teal",   activeBg: "bg-teal-50",   iconBg: "bg-teal-100",   iconText: "text-brand-teal",   dot: "bg-brand-teal" },
