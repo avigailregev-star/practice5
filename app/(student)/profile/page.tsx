@@ -2,7 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import XPBar from "@/components/student/XPBar";
 import AchievementBadge from "@/components/student/AchievementBadge";
-import { ACHIEVEMENT_META, type AchievementType } from "@/lib/gamification/achievements";
+import { ACHIEVEMENT_META, type AchievementType, checkAndGrantAchievements } from "@/lib/gamification/achievements";
 import { logout } from "@/app/actions/auth";
 import { LogOut } from "lucide-react";
 
@@ -30,7 +30,16 @@ export default async function ProfilePage() {
     .eq("student_id", user.id)
     .not("completed_at", "is", null);
 
-  const earnedTypes = new Set(achievements?.map((a) => a.achievement_type) ?? []);
+  // Backfill any achievements the student earned but never received
+  await checkAndGrantAchievements(user.id, profile?.level ?? 1, false);
+
+  // Re-fetch achievements after potential backfill
+  const { data: achievementsAfter } = await supabase
+    .from("achievements")
+    .select("achievement_type")
+    .eq("student_id", user.id) as { data: Array<{ achievement_type: string }> | null };
+
+  const earnedTypes = new Set(achievementsAfter?.map((a) => a.achievement_type) ?? []);
 
   return (
     <main className="max-w-sm mx-auto pb-24 bg-brand-bg min-h-screen">
