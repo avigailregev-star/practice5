@@ -219,14 +219,17 @@ export default async function DashboardPage() {
   const domainDifficulties = (["notes", "rhythm", "pitch"] as const).map((domain) => {
     let belowFifty = 0;
     let total = 0;
+    let scoreSum = 0;
     for (const scores of domainScoresMap.values()) {
       const score = scores[domain];
       if (score !== null) {
         total++;
+        scoreSum += score;
         if (score < 50) belowFifty++;
       }
     }
-    return { domain, label: DOMAIN_LABELS[domain], belowFifty, total };
+    const avgScore = total > 0 ? Math.round(scoreSum / total) : null;
+    return { domain, label: DOMAIN_LABELS[domain], belowFifty, total, avgScore };
   });
 
   const totalSessions = (allSessions ?? []).length;
