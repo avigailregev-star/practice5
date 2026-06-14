@@ -73,41 +73,37 @@ export default function ViolinAnalysisSection({ data }: Props) {
       </div>
 
       {/* איפה הכי קשה */}
-      {data.domainDifficulties.some((d) => d.total > 0) && (
-        <div className="bg-brand-card rounded-2xl border border-brand-border p-4">
-          <h2 className="font-bold text-brand-text mb-3">⚠️ איפה התלמידים מתקשים</h2>
-          <p className="text-xs text-brand-muted mb-3">תלמידים עם ציון מבחן מתחת ל-50%</p>
-          <div className="flex flex-col gap-3">
-            {data.domainDifficulties.map((d) => {
-              const pct = d.total > 0 ? Math.round((d.belowFifty / d.total) * 100) : 0;
-              const color = pct >= 60 ? "bg-red-400" : pct >= 30 ? "bg-amber-400" : "bg-green-400";
-              const textColor = pct >= 60 ? "text-red-600" : pct >= 30 ? "text-amber-600" : "text-green-600";
-              return (
-                <div key={d.domain}>
-                  <div className="flex justify-between items-center mb-1">
-                    <span className="text-sm font-medium text-brand-text">{d.label}</span>
-                    {d.total === 0 ? (
-                      <span className="text-xs text-brand-muted">לא נבדק</span>
-                    ) : (
-                      <span className={`text-xs font-bold ${textColor}`}>
-                        {d.belowFifty}/{d.total} תלמידים
-                      </span>
-                    )}
-                  </div>
-                  {d.total > 0 && (
-                    <div className="w-full h-2 bg-brand-border rounded-full overflow-hidden">
-                      <div
-                        className={`h-full rounded-full transition-all ${color}`}
-                        style={{ width: `${pct}%` }}
-                      />
-                    </div>
+      <div className="bg-brand-card rounded-2xl border border-brand-border p-4">
+        <h2 className="font-bold text-brand-text mb-3">⚠️ איפה התלמידים מתקשים</h2>
+        <p className="text-xs text-brand-muted mb-3">תלמידים עם ציון מבחן מתחת ל-50%</p>
+        <div className="flex flex-col gap-3">
+          {data.domainDifficulties.map((d) => {
+            const pct = d.total > 0 ? Math.round((d.belowFifty / d.total) * 100) : 0;
+            const color = pct >= 60 ? "bg-red-400" : pct >= 30 ? "bg-amber-400" : "bg-green-400";
+            const textColor = pct >= 60 ? "text-red-600" : pct >= 30 ? "text-amber-600" : "text-green-600";
+            return (
+              <div key={d.domain}>
+                <div className="flex justify-between items-center mb-1">
+                  <span className="text-sm font-medium text-brand-text">{d.label}</span>
+                  {d.total === 0 ? (
+                    <span className="text-xs text-brand-muted">טרם נבדק</span>
+                  ) : (
+                    <span className={`text-xs font-bold ${textColor}`}>
+                      {d.belowFifty}/{d.total} תלמידים
+                    </span>
                   )}
                 </div>
-              );
-            })}
-          </div>
+                <div className="w-full h-2 bg-brand-border rounded-full overflow-hidden">
+                  <div
+                    className={`h-full rounded-full transition-all ${d.total === 0 ? "bg-brand-border" : color}`}
+                    style={{ width: d.total === 0 ? "0%" : `${pct}%` }}
+                  />
+                </div>
+              </div>
+            );
+          })}
         </div>
-      )}
+      </div>
     </div>
   );
 }
