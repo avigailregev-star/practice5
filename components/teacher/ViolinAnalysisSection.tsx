@@ -1,24 +1,20 @@
 "use client";
 
-import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  Tooltip,
-  ResponsiveContainer,
-  Cell,
-} from "recharts";
+interface StudentPracticeStatus {
+  name: string;
+  practiced: boolean;
+}
 
-interface SkillStat {
-  skill: string;
-  avgRating: number;
-  count: number;
+interface DomainDifficulty {
+  domain: string;
+  label: string;
+  belowFifty: number;
+  total: number;
 }
 
 interface ViolinAnalysisData {
-  skillStats: SkillStat[];
-  difficultyDistribution: { level: number; count: number }[];
+  studentPracticeStatuses: StudentPracticeStatus[];
+  domainDifficulties: DomainDifficulty[];
   totalSessions: number;
 }
 
@@ -26,74 +22,92 @@ interface Props {
   data: ViolinAnalysisData;
 }
 
-const SKILL_COLORS = ["#ff6b9d", "#4ecdc4", "#a29bfe"];
-const LEVEL_COLORS = ["#55efc4", "#74b9ff", "#fdcb6e", "#e17055", "#d63031"];
-
-// Convert avg self_rating (1=easy,2=ok,3=hard) to 0-100 score (inverted: easy=high)
-function ratingToScore(avg: number): number {
-  return Math.round(((3 - avg) / 2) * 100);
-}
-
 export default function ViolinAnalysisSection({ data }: Props) {
-  const skillData = data.skillStats.map((s, i) => ({
-    name: s.skill,
-    value: ratingToScore(s.avgRating),
-    color: SKILL_COLORS[i % SKILL_COLORS.length],
-    count: s.count,
-  }));
+  if (data.totalSessions === 0 && data.studentPracticeStatuses.length === 0) return null;
 
-  const diffData = data.difficultyDistribution.map((d, i) => ({
-    name: `רמה ${d.level}`,
-    value: d.count,
-    color: LEVEL_COLORS[i % LEVEL_COLORS.length],
-  }));
-
-  if (data.totalSessions === 0) return null;
+  const notPracticed = data.studentPracticeStatuses.filter((s) => !s.practiced);
+  const practiced = data.studentPracticeStatuses.filter((s) => s.practiced);
 
   return (
-    <div className="px-4 mb-6">
+    <div className="px-4 mb-6 flex flex-col gap-4">
+
+      {/* מי לא תרגל השבוע */}
       <div className="bg-brand-card rounded-2xl border border-brand-border p-4">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="font-bold text-brand-text">📊 סטטיסטיקות תרגול</h2>
-          <span className="text-xs text-brand-muted">{data.totalSessions} תרגולים</span>
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="font-bold text-brand-text">📅 תרגול השבוע</h2>
+          <span className="text-xs text-brand-muted">
+            {practiced.length}/{data.studentPracticeStatuses.length} תרגלו
+          </span>
         </div>
 
-        {skillData.length > 0 && (
+        {notPracticed.length === 0 ? (
+          <p className="text-sm text-green-600 font-semibold text-center py-2">✅ כל התלמידים תרגלו השבוע!</p>
+        ) : (
           <>
-            <p className="text-xs font-semibold text-brand-muted mb-2">רמת קושי ממוצעת לפי מיומנות</p>
-            <ResponsiveContainer width="100%" height={160}>
-              <BarChart data={skillData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                <XAxis dataKey="name" tick={{ fontSize: 11 }} />
-                <YAxis domain={[0, 100]} tick={{ fontSize: 11 }} />
-                <Tooltip formatter={(v, _, props) => [`${v}/100`, `${props.payload.count} דירוגים`]} />
-                <Bar dataKey="value" radius={[6, 6, 0, 0]}>
-                  {skillData.map((entry, i) => (
-                    <Cell key={i} fill={entry.color} />
+            {notPracticed.length > 0 && (
+              <div className="mb-3">
+                <p className="text-xs font-semibold text-red-500 mb-2">לא תרגלו ({notPracticed.length})</p>
+                <div className="flex flex-wrap gap-2">
+                  {notPracticed.map((s) => (
+                    <span key={s.name} className="text-xs bg-red-50 border border-red-200 text-red-600 rounded-full px-3 py-1 font-medium">
+                      ❌ {s.name}
+                    </span>
                   ))}
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
-          </>
-        )}
-
-        {diffData.length > 0 && (
-          <>
-            <p className="text-xs font-semibold text-brand-muted mt-4 mb-2">תלמידים לפי רמת קושי</p>
-            <ResponsiveContainer width="100%" height={140}>
-              <BarChart data={diffData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                <XAxis dataKey="name" tick={{ fontSize: 11 }} />
-                <YAxis allowDecimals={false} tick={{ fontSize: 11 }} />
-                <Tooltip formatter={(v) => [`${v}`, "תרגולים"]} />
-                <Bar dataKey="value" radius={[6, 6, 0, 0]}>
-                  {diffData.map((entry, i) => (
-                    <Cell key={i} fill={entry.color} />
+                </div>
+              </div>
+            )}
+            {practiced.length > 0 && (
+              <div>
+                <p className="text-xs font-semibold text-green-600 mb-2">תרגלו ({practiced.length})</p>
+                <div className="flex flex-wrap gap-2">
+                  {practiced.map((s) => (
+                    <span key={s.name} className="text-xs bg-green-50 border border-green-200 text-green-700 rounded-full px-3 py-1 font-medium">
+                      ✅ {s.name}
+                    </span>
                   ))}
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
+                </div>
+              </div>
+            )}
           </>
         )}
       </div>
+
+      {/* איפה הכי קשה */}
+      {data.domainDifficulties.some((d) => d.total > 0) && (
+        <div className="bg-brand-card rounded-2xl border border-brand-border p-4">
+          <h2 className="font-bold text-brand-text mb-3">⚠️ איפה התלמידים מתקשים</h2>
+          <p className="text-xs text-brand-muted mb-3">תלמידים עם ציון מבחן מתחת ל-50%</p>
+          <div className="flex flex-col gap-3">
+            {data.domainDifficulties.map((d) => {
+              const pct = d.total > 0 ? Math.round((d.belowFifty / d.total) * 100) : 0;
+              const color = pct >= 60 ? "bg-red-400" : pct >= 30 ? "bg-amber-400" : "bg-green-400";
+              const textColor = pct >= 60 ? "text-red-600" : pct >= 30 ? "text-amber-600" : "text-green-600";
+              return (
+                <div key={d.domain}>
+                  <div className="flex justify-between items-center mb-1">
+                    <span className="text-sm font-medium text-brand-text">{d.label}</span>
+                    {d.total === 0 ? (
+                      <span className="text-xs text-brand-muted">לא נבדק</span>
+                    ) : (
+                      <span className={`text-xs font-bold ${textColor}`}>
+                        {d.belowFifty}/{d.total} תלמידים
+                      </span>
+                    )}
+                  </div>
+                  {d.total > 0 && (
+                    <div className="w-full h-2 bg-brand-border rounded-full overflow-hidden">
+                      <div
+                        className={`h-full rounded-full transition-all ${color}`}
+                        style={{ width: `${pct}%` }}
+                      />
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -203,50 +203,38 @@ export default async function DashboardPage() {
 
   const practicedThisWeekIds = new Set(sessions.map((s) => s.student_id));
 
-  // Live statistics from Supabase
-  const SKILL_LABELS: Record<string, string> = {
-    notes: "קריאת תווים",
-    rhythm: "מקצבים",
-    scales: "סולמות",
-  };
-
-  const { data: allSessionsForStats } = await supabase
-    .from("practice_sessions")
-    .select("skill_type, difficulty_level, self_rating")
-    .not("completed_at", "is", null) as {
-      data: { skill_type: string; difficulty_level: number; self_rating: number | null }[] | null;
-    };
-
-  const statsRows = allSessionsForStats ?? [];
-
-  // Skill stats: avg self_rating per skill (only rated sessions)
-  const skillAccum = new Map<string, number[]>();
-  for (const s of statsRows) {
-    if (s.self_rating != null) {
-      const arr = skillAccum.get(s.skill_type) ?? [];
-      arr.push(s.self_rating);
-      skillAccum.set(s.skill_type, arr);
-    }
-  }
-  const skillStats = Array.from(skillAccum.entries()).map(([skill, ratings]) => ({
-    skill: SKILL_LABELS[skill] ?? skill,
-    avgRating: ratings.reduce((a, b) => a + b, 0) / ratings.length,
-    count: ratings.length,
+  // Student practice status this week
+  const studentPracticeStatuses = studentList.map((s) => ({
+    name: s.name,
+    practiced: practicedThisWeekIds.has(s.id),
   }));
 
-  // Difficulty distribution
-  const diffAccum = new Map<number, number>();
-  for (const s of statsRows) {
-    diffAccum.set(s.difficulty_level, (diffAccum.get(s.difficulty_level) ?? 0) + 1);
-  }
-  const difficultyDistribution = Array.from(diffAccum.entries())
-    .sort(([a], [b]) => a - b)
-    .map(([level, count]) => ({ level, count }));
+  // Domain difficulties: how many students scored < 50% per domain
+  const DOMAIN_LABELS: Record<string, string> = {
+    notes: "זיהוי תווים 🎵",
+    rhythm: "חוש קצב 🥁",
+    pitch: "גובה צליל 🎤",
+  };
+
+  const domainDifficulties = (["notes", "rhythm", "pitch"] as const).map((domain) => {
+    let belowFifty = 0;
+    let total = 0;
+    for (const scores of domainScoresMap.values()) {
+      const score = scores[domain];
+      if (score !== null) {
+        total++;
+        if (score < 50) belowFifty++;
+      }
+    }
+    return { domain, label: DOMAIN_LABELS[domain], belowFifty, total };
+  });
+
+  const totalSessions = (allSessions ?? []).length;
 
   const violinData = {
-    skillStats,
-    difficultyDistribution,
-    totalSessions: statsRows.length,
+    studentPracticeStatuses,
+    domainDifficulties,
+    totalSessions,
   };
 
   return (
