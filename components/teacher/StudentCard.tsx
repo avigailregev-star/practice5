@@ -62,6 +62,12 @@ interface LastSession {
   skill_type: string;
 }
 
+interface Assessment {
+  type: string;
+  score: number;
+  created_at: string;
+}
+
 interface StudentCardProps {
   studentId: string;
   name: string;
@@ -71,11 +77,14 @@ interface StudentCardProps {
   lastSession: LastSession | null;
   avgRating?: number;
   sessions?: Session[];
+  assessments?: Assessment[];
   recommendedLevel?: number | null;
   domainScores: DomainScores | null;
   weeklySummary: string | null;
   summaryUpdatedAt: string | null;
 }
+
+const DOMAIN_LABEL: Record<string, string> = { notes: "תווים 🎵", rhythm: "קצב 🥁", pitch: "צליל 🎤" };
 
 export default function StudentCard({
   studentId,
@@ -86,6 +95,7 @@ export default function StudentCard({
   lastSession,
   avgRating,
   sessions = [],
+  assessments = [],
   recommendedLevel,
   domainScores,
   weeklySummary: initialSummary,
@@ -235,33 +245,64 @@ export default function StudentCard({
         </div>
 
         {/* Toggle button */}
-        {sessions.length > 0 && (
+        {(sessions.length > 0 || assessments.length > 0) && (
           <button
             onClick={() => setOpen((o) => !o)}
             className="mt-3 w-full text-xs text-brand-muted border border-brand-border rounded-xl py-1.5 hover:bg-brand-bg transition-colors"
           >
-            {open ? "▲ הסתר היסטוריה" : `▼ הצג היסטוריה (${sessions.length} אימונים)`}
+            {open ? "▲ הסתר היסטוריה" : `▼ הצג היסטוריה (${sessions.length} תרגולים · ${assessments.length} מבחנים)`}
           </button>
         )}
       </div>
 
-      {/* Session history */}
-      {open && sessions.length > 0 && (
-        <div className="border-t border-brand-border bg-brand-bg px-4 py-3 space-y-2">
-          {sessions.map((s, i) => (
-            <div key={i} className="flex items-center justify-between text-sm">
-              <div className="flex items-center gap-2 text-brand-muted">
-                <span>{SKILL_LABEL[s.skill_type] ?? s.skill_type}</span>
-                <span>·</span>
-                <span>{s.duration_minutes} דק'</span>
-                <span>·</span>
-                <span>{timeAgo(s.completed_at)}</span>
+      {/* Expanded section: sessions + assessments */}
+      {open && (sessions.length > 0 || assessments.length > 0) && (
+        <div className="border-t border-brand-border bg-brand-bg px-4 py-3 space-y-4">
+          {sessions.length > 0 && (
+            <div>
+              <p className="text-xs font-semibold text-brand-muted tracking-widest mb-2">היסטוריית תרגולים</p>
+              <div className="space-y-2">
+                {sessions.map((s, i) => (
+                  <div key={i} className="flex items-center justify-between text-sm">
+                    <div className="flex items-center gap-2 text-brand-muted">
+                      <span>{SKILL_LABEL[s.skill_type] ?? s.skill_type}</span>
+                      <span>·</span>
+                      <span>{s.duration_minutes} דק'</span>
+                      <span>·</span>
+                      <span>{timeAgo(s.completed_at)}</span>
+                    </div>
+                    {s.self_rating != null && (
+                      <span className="text-base">{RATING_EMOJI[s.self_rating]}</span>
+                    )}
+                  </div>
+                ))}
               </div>
-              {s.self_rating != null && (
-                <span className="text-base">{RATING_EMOJI[s.self_rating]}</span>
-              )}
             </div>
-          ))}
+          )}
+
+          {assessments.length > 0 && (
+            <div>
+              <p className="text-xs font-semibold text-brand-muted tracking-widest mb-2">היסטוריית מבחנים</p>
+              <div className="space-y-1.5">
+                {assessments.map((a, i) => {
+                  const color = a.score >= 80 ? "text-green-600 bg-green-50 border-green-200"
+                    : a.score >= 50 ? "text-amber-600 bg-amber-50 border-amber-200"
+                    : "text-red-600 bg-red-50 border-red-200";
+                  const medal = a.score >= 80 ? "🥇" : a.score >= 50 ? "🥈" : "🥉";
+                  return (
+                    <div key={i} className={`flex items-center justify-between text-sm rounded-xl border px-3 py-2 ${color}`}>
+                      <span className="font-medium">{DOMAIN_LABEL[a.type] ?? a.type}</span>
+                      <span className="flex items-center gap-1.5">
+                        <span className="font-bold">{a.score}%</span>
+                        <span>{medal}</span>
+                        <span className="text-xs opacity-60">{formatDate(a.created_at)}</span>
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
         </div>
       )}
     </div>

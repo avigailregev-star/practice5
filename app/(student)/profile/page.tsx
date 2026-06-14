@@ -41,6 +41,33 @@ export default async function ProfilePage() {
 
   const earnedTypes = new Set(achievementsAfter?.map((a) => a.achievement_type) ?? []);
 
+  // Fetch assessments for domain medals
+  const { data: assessmentRows } = await supabase
+    .from("assessments")
+    .select("type, score")
+    .eq("student_id", user.id) as { data: Array<{ type: string; score: number }> | null };
+
+  const domainAvg = (type: string) => {
+    const scores = (assessmentRows ?? []).filter(a => a.type === type).map(a => a.score);
+    return scores.length > 0 ? Math.round(scores.reduce((a, b) => a + b, 0) / scores.length) : null;
+  };
+
+  const domainMedals = [
+    { key: "notes", label: "זיהוי תווים", emoji: "🎵" },
+    { key: "rhythm", label: "חוש קצב", emoji: "🥁" },
+    { key: "pitch", label: "גובה צליל", emoji: "🎤" },
+  ].map(d => ({
+    ...d,
+    avg: domainAvg(d.key),
+  }));
+
+  function medal(avg: number | null) {
+    if (avg === null) return null;
+    if (avg >= 80) return { icon: "🥇", label: "זהב", color: "bg-yellow-50 border-yellow-300 text-yellow-700" };
+    if (avg >= 50) return { icon: "🥈", label: "כסף", color: "bg-gray-50 border-gray-300 text-gray-600" };
+    return { icon: "🥉", label: "ארד", color: "bg-orange-50 border-orange-300 text-orange-700" };
+  }
+
   return (
     <main className="max-w-sm mx-auto pb-24 bg-brand-bg min-h-screen">
       {/* Header */}
@@ -66,6 +93,24 @@ export default async function ProfilePage() {
         <div className="bg-brand-card rounded-2xl p-4 text-center border border-brand-border">
           <p className="text-2xl font-bold text-brand-pink">{earnedTypes.size}</p>
           <p className="text-sm text-brand-muted">הישגים</p>
+        </div>
+      </div>
+
+      {/* Domain medals */}
+      <div className="mx-4 mt-4 bg-brand-card rounded-2xl p-4 border border-brand-border">
+        <h2 className="font-bold text-brand-text mb-3">ציוני מבחנים</h2>
+        <div className="grid grid-cols-3 gap-3">
+          {domainMedals.map(d => {
+            const m = medal(d.avg);
+            return (
+              <div key={d.key} className={`rounded-xl border p-3 text-center ${m ? m.color : "bg-brand-bg border-brand-border"}`}>
+                <p className="text-2xl">{m ? m.icon : "❓"}</p>
+                <p className="text-lg font-extrabold mt-1">{d.avg !== null ? `${d.avg}%` : "—"}</p>
+                <p className="text-xs font-medium mt-0.5">{d.label}</p>
+                <p className="text-xs opacity-70">{m ? m.label : "טרם נבחנת"}</p>
+              </div>
+            );
+          })}
         </div>
       </div>
 

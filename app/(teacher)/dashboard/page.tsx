@@ -41,9 +41,10 @@ export default async function DashboardPage() {
 
   const { data: allAssessments, error: assessmentsError } = await supabase
     .from("assessments")
-    .select("student_id, type, score")
-    .in("student_id", studentIds.length > 0 ? studentIds : ["no-match"]) as {
-      data: { student_id: string; type: string; score: number }[] | null;
+    .select("student_id, type, score, created_at")
+    .in("student_id", studentIds.length > 0 ? studentIds : ["no-match"])
+    .order("created_at", { ascending: false }) as {
+      data: { student_id: string; type: string; score: number; created_at: string }[] | null;
       error: unknown;
     };
 
@@ -59,6 +60,13 @@ export default async function DashboardPage() {
     }
     const entry = domainAccum.get(a.student_id)!;
     if (entry[a.type]) entry[a.type].push(a.score);
+  }
+
+  const assessmentHistoryMap = new Map<string, { type: string; score: number; created_at: string }[]>();
+  for (const a of allAssessments ?? []) {
+    const arr = assessmentHistoryMap.get(a.student_id) ?? [];
+    arr.push({ type: a.type, score: a.score, created_at: a.created_at });
+    assessmentHistoryMap.set(a.student_id, arr);
   }
 
   const domainScoresMap = new Map<string, { notes: number | null; rhythm: number | null; pitch: number | null }>();
@@ -307,6 +315,7 @@ export default async function DashboardPage() {
                 avgRating={ratingMap.get(student.id)}
                 sessions={sessionHistoryMap.get(student.id) ?? []}
                 recommendedLevel={recommendedLevelMap.get(student.id) ?? null}
+                assessments={assessmentHistoryMap.get(student.id) ?? []}
                 domainScores={domainScoresMap.get(student.id) ?? null}
                 weeklySummary={student.weekly_summary}
                 summaryUpdatedAt={student.summary_updated_at}
