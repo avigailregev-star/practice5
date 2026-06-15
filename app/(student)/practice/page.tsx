@@ -37,7 +37,9 @@ export default async function PracticePage() {
     <main className="max-w-sm mx-auto">
       {/* Header */}
       <div className="bg-gradient-to-br from-brand-pink to-brand-orange px-5 pt-10 pb-5">
-        <p className="text-white/70 text-xs tracking-widest font-semibold mb-1">PRACTICE5</p>
+        <div className="mb-1">
+          <img src="/logo.png" alt="מוזיקול" className="w-8 h-8 object-contain rounded-lg" />
+        </div>
         <div className="flex items-center justify-between">
           <div>
             <p className="text-sm text-white/70">שלום,</p>

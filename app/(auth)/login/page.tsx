@@ -9,7 +9,9 @@ export default async function LoginPage({
   const { error } = await searchParams;
   return (
     <div className="bg-brand-card rounded-3xl border border-brand-border shadow-sm p-8">
-      <p className="text-brand-pink font-bold tracking-widest text-xs text-center mb-4">PRACTICE5</p>
+      <div className="flex justify-center mb-3">
+        <img src="/logo.png" alt="מוזיקול" className="w-24 h-24 object-contain" />
+      </div>
       <h2 className="text-brand-text font-extrabold text-2xl text-center mb-6">כניסה</h2>
       {error && (
         <div className="text-red-500 text-sm rounded-lg px-3 py-2 mb-4 border border-red-200 bg-red-50">
