@@ -55,6 +55,8 @@ export default function TimeSkillSelector() {
       </div>
 
       <div>
+        <h2 className="font-bold text-brand-text mb-1">התרגול היומי שלך</h2>
+        <p className="text-sm text-brand-muted mb-4">בחר זמן ותחום</p>
         <p className="text-xs font-semibold text-brand-muted tracking-widest mb-3">כמה זמן יש לך?</p>
         <div className="grid grid-cols-2 gap-3">
           {DURATIONS.map((d) => (

@@ -112,10 +112,6 @@ export default async function PracticePage() {
 
         {/* Selector */}
         <div className="mx-4 mt-4 rounded-2xl border border-brand-border bg-brand-card">
-          <div className="px-5 pt-4 pb-1">
-            <h2 className="font-bold text-brand-text">התרגול היומי שלך</h2>
-            <p className="text-sm text-brand-muted">בחר זמן ותחום</p>
-          </div>
           <TimeSkillSelector />
         </div>
       </div>
