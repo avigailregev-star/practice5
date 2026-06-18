@@ -25,6 +25,35 @@ export default function TimeSkillSelector() {
 
   return (
     <div className="flex flex-col gap-6 p-5">
+
+      {/* Assessment section — בולט למעלה */}
+      <div className="bg-gradient-to-br from-brand-teal to-brand-purple rounded-2xl p-4 shadow-lg">
+        <p className="text-white font-bold text-base mb-3 text-right">🏆 בחן את הרמה שלך</p>
+        <div className="flex flex-col gap-2">
+          <a
+            href="/practice/assess"
+            className="flex items-center gap-3 px-4 py-3 rounded-xl bg-white/20 text-white hover:bg-white/30 transition-all active:scale-95"
+          >
+            <span className="text-xl">🎵</span>
+            <span className="font-semibold">זיהוי תווים</span>
+          </a>
+          <a
+            href="/practice/rhythm"
+            className="flex items-center gap-3 px-4 py-3 rounded-xl bg-white/20 text-white hover:bg-white/30 transition-all active:scale-95"
+          >
+            <span className="text-xl">🥁</span>
+            <span className="font-semibold">חוש קצב</span>
+          </a>
+          <a
+            href="/practice/pitch"
+            className="flex items-center gap-3 px-4 py-3 rounded-xl bg-white/20 text-white hover:bg-white/30 transition-all active:scale-95"
+          >
+            <span className="text-xl">🎤</span>
+            <span className="font-semibold">גובה צליל</span>
+          </a>
+        </div>
+      </div>
+
       <div>
         <p className="text-xs font-semibold text-brand-muted tracking-widest mb-3">כמה זמן יש לך?</p>
         <div className="grid grid-cols-2 gap-3">
@@ -85,42 +114,6 @@ export default function TimeSkillSelector() {
         {loading ? "מייצר תרגול..." : "התחל תרגול"}
       </button>
 
-      {/* Assessment section */}
-      <div className="border-t border-brand-border pt-4">
-        <p className="text-xs font-semibold text-brand-muted tracking-widest mb-3">בחן את הרמה שלך</p>
-        <div className="flex flex-col gap-2">
-          <a
-            href="/practice/assess"
-            className="flex items-center gap-3 px-4 py-3 rounded-xl border border-brand-border bg-brand-card text-brand-muted hover:bg-pink-50 hover:border-brand-pink hover:text-brand-text transition-all active:scale-95"
-          >
-            <div className="w-8 h-8 rounded-full bg-pink-100 flex items-center justify-center">
-              <Music size={16} strokeWidth={1.5} className="text-brand-pink" />
-            </div>
-            <span className="font-semibold">זיהוי תווים</span>
-            <span className="mr-auto text-lg">🎵</span>
-          </a>
-          <a
-            href="/practice/rhythm"
-            className="flex items-center gap-3 px-4 py-3 rounded-xl border border-brand-border bg-brand-card text-brand-muted hover:bg-teal-50 hover:border-brand-teal hover:text-brand-text transition-all active:scale-95"
-          >
-            <div className="w-8 h-8 rounded-full bg-teal-100 flex items-center justify-center">
-              <Activity size={16} strokeWidth={1.5} className="text-brand-teal" />
-            </div>
-            <span className="font-semibold">חוש קצב</span>
-            <span className="mr-auto text-lg">🥁</span>
-          </a>
-          <a
-            href="/practice/pitch"
-            className="flex items-center gap-3 px-4 py-3 rounded-xl border border-brand-border bg-brand-card text-brand-muted hover:bg-purple-50 hover:border-brand-purple hover:text-brand-text transition-all active:scale-95"
-          >
-            <div className="w-8 h-8 rounded-full bg-purple-100 flex items-center justify-center">
-              <ClipboardList size={16} strokeWidth={1.5} className="text-brand-purple" />
-            </div>
-            <span className="font-semibold">גובה צליל</span>
-            <span className="mr-auto text-lg">🎤</span>
-          </a>
-        </div>
-      </div>
     </div>
   );
 }
